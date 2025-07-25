@@ -1,0 +1,154 @@
+Program 6:Write a python program to implement SVM classifier for the iris dataset. Calculate 
+accuracy, precision, F-score and Display the confusion matrix. 
+from sklearn import datasets 
+from sklearn.model_selection import train_test_split 
+from sklearn.svm import SVC 
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, 
+confusion_matrix, classification_report 
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+# Load dataset (use your own dataset here) 
+iris = datasets.load_iris() 
+X = iris.data 
+y = iris.target 
+# Split the dataset into training and test sets 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
+# Create SVM classifier 
+svm = SVC(kernel='linear')  # You can change to 'rbf' or 'poly' as needed 
+svm.fit(X_train, y_train) 
+# Make predictions 
+y_pred = svm.predict(X_test) 
+# Evaluation metrics 
+accuracy = accuracy_score(y_test, y_pred) 
+precision = precision_score(y_test, y_pred, average='macro')  # or 'micro', 'weighted' 
+recall = recall_score(y_test, y_pred, average='macro') 
+f1 = f1_score(y_test, y_pred, average='macro') 
+conf_matrix = confusion_matrix(y_test, y_pred) 
+# Display results 
+print("Accuracy:", accuracy) 
+print("Precision:", precision) 
+print("Recall:", recall) 
+print("F1 Score:", f1) 
+print("\nClassification Report:\n", classification_report(y_test, y_pred)) 
+# Plot confusion matrix 
+plt.figure(figsize=(6, 4)) 
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
+xticklabels=iris.target_names, 
+yticklabels=iris.target_names) 
+plt.xlabel('Predicted') 
+plt.ylabel('True') 
+plt.title('Confusion Matrix') 
+plt.show() 
+***************************************** 
+
+
+
+
+Program 7: Write a python program to impliment single linkage hierarchical clustering algorithm 
+and show the dendrogram. 
+import numpy as np 
+import matplotlib.pyplot as plt 
+from scipy.cluster.hierarchy import linkage, dendrogram 
+# Define points 
+points = np.array([ 
+[1, 2],  # A 
+[2, 3],  # B 
+[5, 8],  # C 
+[6, 9],  # D 
+[3, 3],  # E 
+]) 
+labels = ['A', 'B', 'C', 'D', 'E'] 
+# Apply Single Linkage Clustering 
+linked = linkage(points, method='single') 
+# Plot dendrogram 
+plt.figure(figsize=(8, 5)) 
+dendrogram(linked, labels=labels, distance_sort='ascending') 
+plt.title('Single Linkage Hierarchical Clustering') 
+plt.xlabel('Points') 
+plt.ylabel('Euclidean Distance') 
+plt.grid(True) 
+plt.show() 
+
+
+
+************************************************************ 
+Program 8: Write a python program to impliment average linkage hierarchical clustering 
+algorithm and show the dendrogram. 
+import numpy as np 
+import matplotlib.pyplot as plt 
+from scipy.cluster.hierarchy import dendrogram, linkage 
+# Sample data: array of 2D points 
+points = np.array([ 
+    [1, 2], 
+    [2, 3], 
+    [3, 3], 
+    [8, 7], 
+    [8, 8], 
+    [25, 80] 
+]) 
+ 
+# Apply average linkage hierarchical clustering 
+linked = linkage(points, method='average') 
+ 
+# Plot dendrogram 
+plt.figure(figsize=(8, 5)) 
+dendrogram(linked, 
+           labels=np.arange(1, len(points)+1), 
+           distance_sort='ascending', 
+           show_leaf_counts=True) 
+plt.title('Hierarchical Clustering Dendrogram (Average Linkage)') 
+plt.xlabel('Point Index') 
+plt.ylabel('Distance') 
+plt.grid(True) 
+plt.show() 
+ 
+********************************************** 
+ 
+Program 9:Write a python program to impliment complete linkage hierarchical clustering 
+algorithm and show the dendrogram.  
+import numpy as np 
+import matplotlib.pyplot as plt 
+from scipy.cluster.hierarchy import dendrogram, linkage 
+ 
+# Sample data points 
+points = np.array([ 
+    [1, 2], 
+    [2, 3], 
+    [3, 3], 
+    [5, 8], 
+    [6, 8], 
+    [7, 9] 
+]) 
+ 
+# Perform hierarchical clustering using complete linkage 
+linked = linkage(points, method='complete') 
+# Plot the dendrogram 
+plt.figure(figsize=(8, 5)) 
+dendrogram(linked, labels=range(1, len(points)+1)) 
+plt.title('Hierarchical Clustering Dendrogram (Complete Linkage)') 
+plt.xlabel('Data Point Index') 
+plt.ylabel('Distance') 
+plt.grid(True) 
+plt.show() 
+************************************************************ 
+Program 10: Write a python program to impliment Kmeans clustering algorithm. 
+import numpy as np 
+import matplotlib.pyplot as plt 
+from sklearn.cluster import KMeans 
+from sklearn.datasets import make_blobs 
+# Generate sample data 
+X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.60, random_state=0) 
+# Apply K-Means clustering 
+kmeans = KMeans(n_clusters=3, random_state=0) 
+kmeans.fit(X) 
+y_kmeans = kmeans.predict(X) 
+# Plotting the clusters 
+plt.scatter(X[:, 0], X[:, 1], c=y_kmeans, s=50, cmap='viridis') 
+# Plotting the cluster centers 
+centers = kmeans.cluster_centers_ 
+plt.scatter(centers[:, 0], centers[:, 1], c='red', s=200, alpha=0.75, marker='X') 
+plt.title("K-Means Clustering") 
+plt.xlabel("Feature 1") 
+plt.ylabel("Feature 2") 
+plt.grid(True) 
+plt.show()
