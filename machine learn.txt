@@ -1,154 +1,205 @@
-Program 6:Write a python program to implement SVM classifier for the iris dataset. Calculate 
-accuracy, precision, F-score and Display the confusion matrix. 
-from sklearn import datasets 
-from sklearn.model_selection import train_test_split 
-from sklearn.svm import SVC 
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, 
-confusion_matrix, classification_report 
-import matplotlib.pyplot as plt 
-import seaborn as sns 
-# Load dataset (use your own dataset here) 
-iris = datasets.load_iris() 
-X = iris.data 
-y = iris.target 
-# Split the dataset into training and test sets 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
-# Create SVM classifier 
-svm = SVC(kernel='linear')  # You can change to 'rbf' or 'poly' as needed 
-svm.fit(X_train, y_train) 
-# Make predictions 
-y_pred = svm.predict(X_test) 
-# Evaluation metrics 
-accuracy = accuracy_score(y_test, y_pred) 
-precision = precision_score(y_test, y_pred, average='macro')  # or 'micro', 'weighted' 
-recall = recall_score(y_test, y_pred, average='macro') 
-f1 = f1_score(y_test, y_pred, average='macro') 
-conf_matrix = confusion_matrix(y_test, y_pred) 
-# Display results 
-print("Accuracy:", accuracy) 
-print("Precision:", precision) 
-print("Recall:", recall) 
-print("F1 Score:", f1) 
-print("\nClassification Report:\n", classification_report(y_test, y_pred)) 
-# Plot confusion matrix 
-plt.figure(figsize=(6, 4)) 
-sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
-xticklabels=iris.target_names, 
-yticklabels=iris.target_names) 
-plt.xlabel('Predicted') 
-plt.ylabel('True') 
-plt.title('Confusion Matrix') 
-plt.show() 
-***************************************** 
+PROGRAM 1
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import Perceptron
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
+# Generate a synthetic linearly separable dataset
+X, y = make_classification(
+    n_samples=100, n_features=2, n_informative=2,
+    n_redundant=0, n_clusters_per_class=1,
+    flip_y=0, random_state=42
+)
 
+# Split the dataset into training and testing subsets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
+# Train and evaluate the Perceptron
+perceptron = Perceptron(max_iter=1000, eta0=1, random_state=42)
+perceptron.fit(X_train, y_train)
+accuracy = accuracy_score(y_test, perceptron.predict(X_test))
+print(f'Accuracy: {accuracy:.2f}')
 
-Program 7: Write a python program to impliment single linkage hierarchical clustering algorithm 
-and show the dendrogram. 
-import numpy as np 
-import matplotlib.pyplot as plt 
-from scipy.cluster.hierarchy import linkage, dendrogram 
-# Define points 
-points = np.array([ 
-[1, 2],  # A 
-[2, 3],  # B 
-[5, 8],  # C 
-[6, 9],  # D 
-[3, 3],  # E 
-]) 
-labels = ['A', 'B', 'C', 'D', 'E'] 
-# Apply Single Linkage Clustering 
-linked = linkage(points, method='single') 
-# Plot dendrogram 
-plt.figure(figsize=(8, 5)) 
-dendrogram(linked, labels=labels, distance_sort='ascending') 
-plt.title('Single Linkage Hierarchical Clustering') 
-plt.xlabel('Points') 
-plt.ylabel('Euclidean Distance') 
-plt.grid(True) 
-plt.show() 
+# Plot decision boundary
+xx, yy = np.meshgrid(
+    np.linspace(X[:, 0].min() - 1, X[:, 0].max() + 1, 100),
+    np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 100)
+)
+Z = perceptron.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
 
-
-
-************************************************************ 
-Program 8: Write a python program to impliment average linkage hierarchical clustering 
-algorithm and show the dendrogram. 
-import numpy as np 
-import matplotlib.pyplot as plt 
-from scipy.cluster.hierarchy import dendrogram, linkage 
-# Sample data: array of 2D points 
-points = np.array([ 
-    [1, 2], 
-    [2, 3], 
-    [3, 3], 
-    [8, 7], 
-    [8, 8], 
-    [25, 80] 
-]) 
- 
-# Apply average linkage hierarchical clustering 
-linked = linkage(points, method='average') 
- 
-# Plot dendrogram 
-plt.figure(figsize=(8, 5)) 
-dendrogram(linked, 
-           labels=np.arange(1, len(points)+1), 
-           distance_sort='ascending', 
-           show_leaf_counts=True) 
-plt.title('Hierarchical Clustering Dendrogram (Average Linkage)') 
-plt.xlabel('Point Index') 
-plt.ylabel('Distance') 
-plt.grid(True) 
-plt.show() 
- 
-********************************************** 
- 
-Program 9:Write a python program to impliment complete linkage hierarchical clustering 
-algorithm and show the dendrogram.  
-import numpy as np 
-import matplotlib.pyplot as plt 
-from scipy.cluster.hierarchy import dendrogram, linkage 
- 
-# Sample data points 
-points = np.array([ 
-    [1, 2], 
-    [2, 3], 
-    [3, 3], 
-    [5, 8], 
-    [6, 8], 
-    [7, 9] 
-]) 
- 
-# Perform hierarchical clustering using complete linkage 
-linked = linkage(points, method='complete') 
-# Plot the dendrogram 
-plt.figure(figsize=(8, 5)) 
-dendrogram(linked, labels=range(1, len(points)+1)) 
-plt.title('Hierarchical Clustering Dendrogram (Complete Linkage)') 
-plt.xlabel('Data Point Index') 
-plt.ylabel('Distance') 
-plt.grid(True) 
-plt.show() 
-************************************************************ 
-Program 10: Write a python program to impliment Kmeans clustering algorithm. 
-import numpy as np 
-import matplotlib.pyplot as plt 
-from sklearn.cluster import KMeans 
-from sklearn.datasets import make_blobs 
-# Generate sample data 
-X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.60, random_state=0) 
-# Apply K-Means clustering 
-kmeans = KMeans(n_clusters=3, random_state=0) 
-kmeans.fit(X) 
-y_kmeans = kmeans.predict(X) 
-# Plotting the clusters 
-plt.scatter(X[:, 0], X[:, 1], c=y_kmeans, s=50, cmap='viridis') 
-# Plotting the cluster centers 
-centers = kmeans.cluster_centers_ 
-plt.scatter(centers[:, 0], centers[:, 1], c='red', s=200, alpha=0.75, marker='X') 
-plt.title("K-Means Clustering") 
-plt.xlabel("Feature 1") 
-plt.ylabel("Feature 2") 
-plt.grid(True) 
+plt.figure(figsize=(10, 6))
+plt.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+plt.scatter(X[:, 0], X[:, 1], c=y, edgecolor='k', cmap='coolwarm', marker='o')
+plt.title('Perceptron Classification')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
 plt.show()
+
+PROGRAM 2
+import numpy as np
+from sklearn.linear_model import Perceptron
+from sklearn.metrics import accuracy_score
+# Data for AND, OR, XOR gates
+data = {
+’AND’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 0, 0, 1])),
+# Use 0 and 1 for labels
+’OR’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 1, 1, 1])),
+# Use 0 and 1 for labels
+’XOR’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 1, 1, 0])),
+# Use 0 and 1 for labels
+}
+# Classify AND, OR, XOR gates
+for gate, (X, y) in data.items():
+# Initialize and train the Perceptron
+perceptron = Perceptron(max_iter=10, eta0=1, random_state=42)
+perceptron.fit(X, y)
+# Make predictions
+y_pred = perceptron.predict(X)
+# Calculate accuracy
+acc = accuracy_score(y, y_pred) * 100
+print(f"{gate} gate accuracy: {acc:.2f}%")
+# Output predictions and true labels for clarity
+print(f"Predictions: {y_pred}")
+print(f"True Labels: {y}")
+
+PROGRAM 3
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.utils import to_categorical
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+# Load and preprocess the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+# One-hot encode labels
+y = to_categorical(y)
+# Standardize features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+# Split dataset into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Build the neural network with exactly four hidden layers
+model = Sequential([
+Dense(64, activation='relu', input_shape=(X_train.shape[1],)), # Input layer
+Dense(64, activation='relu'), # Hidden layer 1
+Dense(64, activation='relu'), # Hidden layer 2
+Dense(64, activation='relu'), # Hidden layer 3
+Dense(64, activation='relu'), # Hidden layer 4
+Dense(3, activation='softmax') # Output layer with 3 units for 3 classes
+])
+# Compile the model
+model.compile(optimizer='adam',
+loss='categorical_crossentropy',
+metrics=['accuracy'])
+# Train the model
+history = model.fit(X_train, y_train, epochs=10, batch_size=10, validation_split=0.2, verbose=1)
+# Evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f'Test Loss: {loss:.4f}')
+print(f'Test Accuracy: {accuracy * 100:.2f}%')
+# Make predictions
+predictions = model.predict(X_test)
+predicted_classes = tf.argmax(predictions, axis=1)
+true_classes = tf.argmax(y_test, axis=1)
+accuracy = tf.reduce_mean(tf.cast(predicted_classes == true_classes, tf.float32))
+print(f'Predicted Accuracy: {accuracy.numpy() * 100:.2f}%')
+
+PROGRAM 4 
+import tensorflow as tf
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+import numpy as np
+iris = load_iris()
+X = iris.data
+y = iris.target
+encoder = OneHotEncoder(sparse_output=False)
+y = encoder.fit_transform(y.reshape(-1, 1))
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+class DeepNN(tf.keras.Model):
+    def __init__(self):
+        super(DeepNN, self).__init__()
+        self.dense1 = tf.keras.layers.Dense(64, activation='relu')
+        self.dense2 = tf.keras.layers.Dense(64, activation='relu')
+        self.dense3 = tf.keras.layers.Dense(64, activation='relu')
+        self.dense4 = tf.keras.layers.Dense(64, activation='relu')
+        self.output_layer = tf.keras.layers.Dense(3, activation='softmax')
+
+    def call(self, inputs):
+        x = self.dense1(inputs)
+        x = self.dense2(x)
+        x = self.dense3(x)
+        x = self.dense4(x)
+        return self.output_layer(x)
+
+model = DeepNN()
+
+def compute_loss(y_true, y_pred):
+    return tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true, y_pred))
+
+optimizer = tf.keras.optimizers.Adam()
+
+def train_step(X_batch, y_batch):
+    with tf.GradientTape() as tape:
+        y_pred = model(X_batch, training=True)
+        loss = compute_loss(y_batch, y_pred)
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    return loss
+
+epochs = 100
+batch_size = 10
+
+for epoch in range(epochs):
+    for i in range(0, len(X_train), batch_size):
+        X_batch = X_train[i:i+batch_size]
+        y_batch = y_train[i:i+batch_size]
+        loss = train_step(X_batch, y_batch)
+    if epoch % 10 == 0:
+        print(f'Epoch {epoch}, Loss: {loss.numpy()}')
+
+def evaluate_model(X_test, y_test):
+    y_pred = model(X_test, training=False)
+    correct_predictions = tf.equal(tf.argmax(y_test, axis=1), tf.argmax(y_pred, axis=1))
+    accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
+    return accuracy.numpy()
+
+accuracy = evaluate_model(X_test, y_test)
+print(f'Test Accuracy: {accuracy * 100:.2f}%')
+
+PROGRAM 5
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.utils import to_categorical
+# Load and preprocess the MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+# Normalize the input data
+X_train = X_train.astype('float32') / 255.0
+X_test = X_test.astype('float32') / 255.0
+# Convert labels to one-hot encoding
+y_train = to_categorical(y_train, num_classes=10)
+y_test = to_categorical(y_test, num_classes=10)
+# Define the model
+model = Sequential([
+Flatten(input_shape=(28, 28)), # Flatten the input images
+Dense(128, activation='relu'), # First hidden layer
+Dense(256, activation='relu'), # Second hidden layer
+Dense(10, activation='softmax') # Output layer
+])
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+# Train the model
+model.fit(X_train, y_train, epochs=5, batch_size=64, validation_split=0.2)
+# Evaluate the model on the test set
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print(f'Test Loss: {test_loss:.4f}')
+print(f'Test Accuracy: {test_accuracy:.2f}')
