@@ -1,205 +1,151 @@
-PROGRAM 1
-import numpy as np
-from sklearn.datasets import make_classification
-from sklearn.linear_model import Perceptron
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
+Title: Write a program to Compute Linear & Circular convolution, Cross & Auto 
+correlation using ECG/EEG/EMG 
+Software Required: 
+MATLAB 
+Program Code: 
+x = [1 2 3 4]; 
+h = [1 0 -1]; 
+y_linear = conv(x, h); 
+N = length(x); 
+y_circular = cconv(x, h, N); 
+auto_corr = xcorr(x); 
+x2 = [4 3 2 1]; 
+cross_corr = xcorr(x, x2); 
+subplot(2,2,1); stem(y_linear); title('Linear Convolution'); 
+subplot(2,2,2); stem(y_circular); title('Circular Convolution'); 
+subplot(2,2,3); stem(auto_corr); title('Auto-correlation'); 
+subplot(2,2,4); stem(cross_corr); title('Cross-correlation'); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is achieved.
 
-# Generate a synthetic linearly separable dataset
-X, y = make_classification(
-    n_samples=100, n_features=2, n_informative=2,
-    n_redundant=0, n_clusters_per_class=1,
-    flip_y=0, random_state=42
-)
+Experiment 2 
+Title: Write a program to Compute DFT, FFT, Power spectrum and power spectral 
+density of ECG/EEG/EMG. 
+Software Required: 
+MATLAB 
+Program Code: 
+fs = 500; 
+N = length(x); 
+t = (0:N-1)/fs; 
+X_fft = fft(x); 
+f = (0:N-1)*(fs/N); 
+power_spectrum = abs(X_fft).^2; 
+[psd_vals, freq_psd] = periodogram(x, [], [], fs); 
+figure; 
+subplot(2,2,1); plot(t, x); title('Original ECG Signal'); xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(2,2,2); plot(f, abs(X_fft)); title('Magnitude Spectrum using FFT'); 
+xlabel('Frequency (Hz)'); ylabel('|X(f)|'); 
+subplot(2,2,3); plot(f, power_spectrum); title('Power Spectrum'); xlabel('Frequency 
+(Hz)'); ylabel('Power'); 
+subplot(2,2,4); plot(freq_psd, 10*log10(psd_vals)); title('Power Spectral Density 
+(PSD)'); xlabel('Frequency (Hz)'); ylabel('Power/Frequency (dB/Hz)'); 
+Result: 
+The expected output is verified and the objective of the experiment is achieved.
 
-# Split the dataset into training and testing subsets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+Experiment 3 
+Title: Write a program to Display Static and Moving ECG signal. 
+Software Required: 
+MATLAB 
+Program Code: 
+figure; 
+plot(x); 
+title('Static ECG Signal'); 
+figure; 
+for i = 1:50:length(x)-200 
+plot(x(i:i+199)); 
+axis([0 200 min(x) max(x)]); 
+title('Moving ECG Signal'); 
+pause(0.05); 
+end 
+Result: 
+The expected output is verified and the objective of the experiment is achieved.
 
-# Train and evaluate the Perceptron
-perceptron = Perceptron(max_iter=1000, eta0=1, random_state=42)
-perceptron.fit(X_train, y_train)
-accuracy = accuracy_score(y_test, perceptron.predict(X_test))
-print(f'Accuracy: {accuracy:.2f}')
+Experiment 4 
+Title: Write a program to Implement 50Hz notch filter for ECG signal and display 
+PSD. 
+Software Required: 
+MATLAB 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg_clean = 1.2 * sin(2*pi*1.7*t) + 0.25 * randn(size(t)); 
+noise = 0.5 * sin(2*pi*50*t); 
+ecg_noisy = ecg_clean + noise; 
+f0 = 50; 
+Q = 30; 
+w0 = 2*pi*f0/fs; 
+alpha = sin(w0)/(2*Q); 
+b0 = 1; 
+b1 = -2*cos(w0); 
+b2 = 1; 
+a0 = 1 + alpha; 
+a1 = -2*cos(w0); 
+a2 = 1 - alpha; 
+b = [b0 b1 b2] / a0; 
+a = [a0 a1 a2] / a0; 
+ecg_filtered = zeros(size(ecg_noisy)); 
+for n = 3:length(ecg_noisy) 
+ecg_filtered(n) = b(1)*ecg_noisy(n) + b(2)*ecg_noisy(n-1) + b(3)*ecg_noisy(n-2) 
+... 
+end - a(2)*ecg_filtered(n-1) - a(3)*ecg_filtered(n-2); 
+N = length(ecg_noisy); 
+f = (0:N-1)*(fs/N); 
+ecg_psd_noisy = abs(fft(ecg_noisy)).^2/N; 
+ecg_psd_filtered = abs(fft(ecg_filtered)).^2/N; 
+figure; 
+subplot(2,1,1); 
+plot(f, 10*log10(ecg_psd_noisy)); 
+title('PSD of Noisy ECG'); 
+xlabel('Frequency (Hz)'); 
+ylabel('Power/Frequency (dB/Hz)'); 
+xlim([0 fs/2]); 
+subplot(2,1,2); 
+plot(f, 10*log10(ecg_psd_filtered)); 
+title('PSD of Filtered ECG (50Hz Notch)'); 
+xlabel('Frequency (Hz)'); 
+ylabel('Power/Frequency (dB/Hz)'); 
+xlim([0 fs/2]); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is achieved.
 
-# Plot decision boundary
-xx, yy = np.meshgrid(
-    np.linspace(X[:, 0].min() - 1, X[:, 0].max() + 1, 100),
-    np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 100)
-)
-Z = perceptron.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
-
-plt.figure(figsize=(10, 6))
-plt.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
-plt.scatter(X[:, 0], X[:, 1], c=y, edgecolor='k', cmap='coolwarm', marker='o')
-plt.title('Perceptron Classification')
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.show()
-
-PROGRAM 2
-import numpy as np
-from sklearn.linear_model import Perceptron
-from sklearn.metrics import accuracy_score
-# Data for AND, OR, XOR gates
-data = {
-’AND’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 0, 0, 1])),
-# Use 0 and 1 for labels
-’OR’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 1, 1, 1])),
-# Use 0 and 1 for labels
-’XOR’: (np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 1, 1, 0])),
-# Use 0 and 1 for labels
-}
-# Classify AND, OR, XOR gates
-for gate, (X, y) in data.items():
-# Initialize and train the Perceptron
-perceptron = Perceptron(max_iter=10, eta0=1, random_state=42)
-perceptron.fit(X, y)
-# Make predictions
-y_pred = perceptron.predict(X)
-# Calculate accuracy
-acc = accuracy_score(y, y_pred) * 100
-print(f"{gate} gate accuracy: {acc:.2f}%")
-# Output predictions and true labels for clarity
-print(f"Predictions: {y_pred}")
-print(f"True Labels: {y}")
-
-PROGRAM 3
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.utils import to_categorical
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-# Load and preprocess the Iris dataset
-iris = load_iris()
-X = iris.data
-y = iris.target
-# One-hot encode labels
-y = to_categorical(y)
-# Standardize features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-# Split dataset into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-# Build the neural network with exactly four hidden layers
-model = Sequential([
-Dense(64, activation='relu', input_shape=(X_train.shape[1],)), # Input layer
-Dense(64, activation='relu'), # Hidden layer 1
-Dense(64, activation='relu'), # Hidden layer 2
-Dense(64, activation='relu'), # Hidden layer 3
-Dense(64, activation='relu'), # Hidden layer 4
-Dense(3, activation='softmax') # Output layer with 3 units for 3 classes
-])
-# Compile the model
-model.compile(optimizer='adam',
-loss='categorical_crossentropy',
-metrics=['accuracy'])
-# Train the model
-history = model.fit(X_train, y_train, epochs=10, batch_size=10, validation_split=0.2, verbose=1)
-# Evaluate the model
-loss, accuracy = model.evaluate(X_test, y_test)
-print(f'Test Loss: {loss:.4f}')
-print(f'Test Accuracy: {accuracy * 100:.2f}%')
-# Make predictions
-predictions = model.predict(X_test)
-predicted_classes = tf.argmax(predictions, axis=1)
-true_classes = tf.argmax(y_test, axis=1)
-accuracy = tf.reduce_mean(tf.cast(predicted_classes == true_classes, tf.float32))
-print(f'Predicted Accuracy: {accuracy.numpy() * 100:.2f}%')
-
-PROGRAM 4 
-import tensorflow as tf
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-import numpy as np
-iris = load_iris()
-X = iris.data
-y = iris.target
-encoder = OneHotEncoder(sparse_output=False)
-y = encoder.fit_transform(y.reshape(-1, 1))
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-class DeepNN(tf.keras.Model):
-    def __init__(self):
-        super(DeepNN, self).__init__()
-        self.dense1 = tf.keras.layers.Dense(64, activation='relu')
-        self.dense2 = tf.keras.layers.Dense(64, activation='relu')
-        self.dense3 = tf.keras.layers.Dense(64, activation='relu')
-        self.dense4 = tf.keras.layers.Dense(64, activation='relu')
-        self.output_layer = tf.keras.layers.Dense(3, activation='softmax')
-
-    def call(self, inputs):
-        x = self.dense1(inputs)
-        x = self.dense2(x)
-        x = self.dense3(x)
-        x = self.dense4(x)
-        return self.output_layer(x)
-
-model = DeepNN()
-
-def compute_loss(y_true, y_pred):
-    return tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true, y_pred))
-
-optimizer = tf.keras.optimizers.Adam()
-
-def train_step(X_batch, y_batch):
-    with tf.GradientTape() as tape:
-        y_pred = model(X_batch, training=True)
-        loss = compute_loss(y_batch, y_pred)
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    return loss
-
-epochs = 100
-batch_size = 10
-
-for epoch in range(epochs):
-    for i in range(0, len(X_train), batch_size):
-        X_batch = X_train[i:i+batch_size]
-        y_batch = y_train[i:i+batch_size]
-        loss = train_step(X_batch, y_batch)
-    if epoch % 10 == 0:
-        print(f'Epoch {epoch}, Loss: {loss.numpy()}')
-
-def evaluate_model(X_test, y_test):
-    y_pred = model(X_test, training=False)
-    correct_predictions = tf.equal(tf.argmax(y_test, axis=1), tf.argmax(y_pred, axis=1))
-    accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
-    return accuracy.numpy()
-
-accuracy = evaluate_model(X_test, y_test)
-print(f'Test Accuracy: {accuracy * 100:.2f}%')
-
-PROGRAM 5
-import tensorflow as tf
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.utils import to_categorical
-# Load and preprocess the MNIST dataset
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
-# Normalize the input data
-X_train = X_train.astype('float32') / 255.0
-X_test = X_test.astype('float32') / 255.0
-# Convert labels to one-hot encoding
-y_train = to_categorical(y_train, num_classes=10)
-y_test = to_categorical(y_test, num_classes=10)
-# Define the model
-model = Sequential([
-Flatten(input_shape=(28, 28)), # Flatten the input images
-Dense(128, activation='relu'), # First hidden layer
-Dense(256, activation='relu'), # Second hidden layer
-Dense(10, activation='softmax') # Output layer
-])
-# Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-# Train the model
-model.fit(X_train, y_train, epochs=5, batch_size=64, validation_split=0.2)
-# Evaluate the model on the test set
-test_loss, test_accuracy = model.evaluate(X_test, y_test)
-print(f'Test Loss: {test_loss:.4f}')
-print(f'Test Accuracy: {test_accuracy:.2f}')
+Experiment 5 
+Title: Write a program to Implement IIR filters for ECG (LPF, HPF, BPF). 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg = 1.2*sin(2*pi*1.2*t) + 0.5*sin(2*pi*50*t) + 0.1*randn(size(t)); 
+% Low-pass filter (cutoff 40 Hz) 
+fc_l = 40; 
+wc_l = 2*pi*fc_l/fs; 
+alpha_l = (1 - sin(wc_l)) / cos(wc_l); 
+b_l = [(1 - alpha_l)/2, (1 - alpha_l)/2]; 
+a_l = [1, -alpha_l]; 
+ecg_lpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_lpf(n) = b_l(1)*ecg(n) + b_l(2)*ecg(n-1) - a_l(2)*ecg_lpf(n-1); 
+end 
+% High-pass filter (cutoff 0.5 Hz) 
+fc_h = 0.5; 
+wc_h = 2*pi*fc_h/fs; 
+alpha_h = (1 - sin(wc_h)) / cos(wc_h); 
+b_h = [(1 + alpha_h)/2, -(1 + alpha_h)/2]; 
+a_h = [1, -alpha_h]; 
+ecg_hpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_hpf(n) = b_h(1)*ecg(n) + b_h(2)*ecg(n-1) - a_h(2)*ecg_hpf(n-1); 
+end 
+% Band-pass filter (0.5 Hz - 40 Hz) 
+ecg_bpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_bpf(n) = ecg_lpf(n) + ecg_hpf(n); 
+end 
+% Plot signals 
+figure; 
+subplot(4,1,1); plot(t, ecg); title('Original ECG'); 
+subplot(4,1,2); plot(t, ecg_lpf); title('Low-pass Filtered ECG'); 
+subplot(4,1,3); plot(t, ecg_hpf); title('High-pass Filtered ECG'); 
+subplot(4,1,4); plot(t, ecg_bpf); title('Band-pass Filtered ECG'); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is 
+achieved.
