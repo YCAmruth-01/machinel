@@ -1,319 +1,219 @@
-Order databae
---Create Table SALESMAN with Primary Key as SALESMAN_ID 
-CREATE TABLE SALESMAN 
-(SALESMAN_ID INTEGER, 
-NAME VARCHAR(20), 
-CITY VARCHAR(20), 
-COMMISSION VARCHAR(20), 
-PRIMARY KEY (SALESMAN_ID)); 
-DESC SALESMAN; -------------------------------------- --Create Table CUSTOMER with Primary Key as CUSTOMER_ID and Foreign Key 
-SALESMAN_ID referring the SALESMAN table 
-CREATE TABLE CUSTOMER( 
-CUSTOMER_ID INTEGER PRIMARY KEY, 
-CUST_NAME VARCHAR(20), 
-CITY VARCHAR(20), 
-GRADE INTEGER, 
-SALESMAN_ID INTEGER, 
-FOREIGN KEY (SALESMAN_ID) REFERENCES SALESMAN(SALESMAN_ID) ON DELETE 
-SET NULL); 
-DESC CUSTOMER; 
--------------------------------------- --Create Table ORDERS with Primary Key as ORDER_NO and Foreign Key CUSTOMER_ID and 
-SALESMAN_ID referring the CUSTOMER and SALESMAN tables respectively 
-CREATE TABLE ORDERS( 
-ORDER_NO INTEGER PRIMARY KEY, 
-PURCHASE_AMOUNT DECIMAL(10,2), 
-ORDER_DATE DATE, 
-CUSTOMER_ID INTEGER, 
-SALESMAN_ID INTEGER, 
-FOREIGN KEY (CUSTOMER_ID) REFERENCES CUSTOMER(CUSTOMER_ID)ON DELETE 
-CASCADE, 
-FOREIGN KEY (SALESMAN_ID) REFERENCES SALESMAN(SALESMAN_ID) ON DELETE 
-CASCADE); 
-DESC ORDERS; --Inserting records into SALESMAN table 
-INSERT INTO SALESMAN VALUES(1000,'RAHUL','BANGALORE','20%'); 
-INSERT INTO SALESMAN VALUES(2000,'ANKITA','BANGALORE','25%'); 
-INSERT INTO SALESMAN VALUES(3000,'SHARMA','MYSORE','30%'); 
-INSERT INTO SALESMAN VALUES(4000,'ANJALI','DELHI','15%'); 
-INSERT INTO SALESMAN VALUES(5000,'RAJ','HYDERABAD','15%'); 
-SELECT * FROM SALESMAN; 
------------------------------------------- --Inserting records into CUSTOMER table 
-INSERT INTO CUSTOMER VALUES(1,'ADYA','BANGALORE',100,1000); 
-INSERT INTO CUSTOMER VALUES(2,'BANU','MANGALORE',300,1000); 
-INSERT INTO CUSTOMER VALUES(3,'CHETHAN','CHENNAI',400,2000); 
-INSERT INTO CUSTOMER VALUES(4,'DANISH','BANGALORE',200,2000); 
-INSERT INTO CUSTOMER VALUES(5,'ESHA','BANGALORE',400,3000); 
-SELECT * FROM CUSTOMER; ------------------------------------------ --Inserting records into ORDERS table 
-INSERT INTO ORDERS VALUES(201,5000,'2020-06-02',1,1000); 
-INSERT INTO ORDERS VALUES(202,450,'2020-04-09',1,2000); 
-INSERT INTO ORDERS VALUES(203,1000,'2020-03-15',3,2000); 
-INSERT INTO ORDERS VALUES(204,3500,'2020-07-09',4,3000); 
-INSERT INTO ORDERS VALUES(205,550,'2020-05-05',2,2000); 
-SELECT * FROM ORDERS; 
-Count the customers with grades above Bangalore’s average. 
-SELECT GRADE,COUNT(DISTINCT CUSTOMER_ID) 
-FROM CUSTOMER 
-GROUP BY GRADE 
-HAVING GRADE>(SELECT AVG(GRADE) 
-FROM CUSTOMER 
-WHERE CITY='BANGALORE'); 
-Find the name and numbers of all salesmen who had more than one customer. 
-SELECT SALESMAN_ID, NAME 
-FROM SALESMAN A 
-WHERE 1<(SELECT COUNT(*) 
-FROM CUSTOMER 
-WHERE SALESMAN_ID=A.SALESMAN_ID); 
-List all salesmen and indicate those who have and don’t have customers in their 
-cities (Use UNION operation.) 
-SELECT SALESMAN.SALESMAN_ID, NAME,CUST_NAME,COMMISSION 
-FROM SALESMAN,CUSTOMER 
-WHERE SALESMAN.CITY=CUSTOMER.CITY 
-UNION 
-SELECT SALESMAN_ID,NAME,'NO MATCH',COMMISSION 
-FROM SALESMAN 
-WHERE NOT CITY=ANY 
-(SELECT CITY 
-FROM CUSTOMER) 
-ORDER BY 2 DESC; 
-Create a view that finds the salesman who has the customer with the highest order 
-of a day. 
-CREATE VIEW ELITSALESMAN AS 
-SELECT B.ORDER_DATE,A.SALESMAN_ID,A.NAME 
-FROM SALESMAN A,ORDERS B 
-WHERE A.SALESMAN_ID=B.SALESMAN_ID 
-AND B.PURCHASE_AMOUNT=(SELECT MAX(PURCHASE_AMOUNT) 
-FROM ORDERS C 
-WHERE C.ORDER_DATE=B.ORDER_DATE); 
-Demonstrate the DELETE operation by removing salesman with id 1000. All his 
-orders must also be deleted. 
-DELETE FROM SALESMAN 
-WHERE SALESMAN_ID=1000;
+Experiment 6 
+Title: Write a program to Implement Low-Pass FIR filter for ECG. 
+Program Code: 
+fs = 500;                      
+t = 0:1/fs:10;                
+% Sampling frequency (Hz) 
+ % Time vector for 10 seconds 
+ecg = 1.2*sin(2*pi*1.7*t) + 0.5*sin(2*pi*60*t) + 0.1*randn(size(t));  % Simulated 
+ECG + 60Hz noise 
+fc = 40;                      
+N = 51;                        
+n = 0:N-1;                    
+ % Cutoff frequency (Hz) 
+% Filter order (odd number for symmetric FIR) 
+ % Filter sample indices 
+% Ideal impulse response of low-pass filter (sinc function) 
+wc = 2*pi*fc/fs; 
+h = sin(wc*(n - (N-1)/2)) ./ (pi*(n - (N-1)/2)); 
+h((N-1)/2 + 1) = wc / pi;      
+% Handle division by zero at center 
+% Apply window (Hann window) 
+w = hann(N)'; 
+h = h .* w; 
+% Normalize filter coefficients 
+h = h / sum(h); 
+% Filter ECG signal using convolution 
+ecg_filtered = conv(ecg, h, 'same'); 
+% Plot the results 
+figure; 
+plot(t, ecg, 'b'); hold on; 
+plot(t, ecg_filtered, 'r'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+title('Low-Pass FIR Filtered ECG'); 
+legend('Original ECG', 'Filtered ECG'); 
+grid on; 
+load ecg; 
+fs = 360; 
+order = 20; 
+cutoff = 0.1; 
+b = fir1(order, cutoff); 
+y = filter(b, 1, ecg); 
+plot(y); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
 
 
-
-Movie database
-Table Creation 
- 
- 
- 
-CREATE TABLE ACTOR( 
-ACT_ID INTEGER, 
-ACT_NAME VARCHAR(20), 
-ACT_GENDER CHAR(1), 
-PRIMARY KEY (ACT_ID)); 
- 
- 
- 
-CREATE TABLE DIRECTOR( 
-DIR_ID INTEGER, 
-DIR_NAME VARCHAR(20), 
-DIR_PHONE INTEGER, 
-PRIMARY KEY (DIR_ID)); 
- 
-DESC DIRECTOR; 
- 
-CREATE TABLE MOVIES( 
-MOV_ID INTEGER, 
-MOV_TITLE VARCHAR(25), 
-MOV_YEAR INTEGER, 
-MOV_LANG VARCHAR(12), 
-DIR_ID INTEGER, 
-PRIMARY KEY (MOV_ID), 
-FOREIGN KEY (DIR_ID) REFERENCES DIRECTOR(DIR_ID)); 
-DESC MOVIES; 
-CREATE TABLE MOVIECAST( 
-ACT_ID INTEGER, 
-MOV_ID INTEGER, 
-ROLE VARCHAR(10), 
-PRIMARY KEY (ACT_ID,MOV_ID), 
-FOREIGN KEY (ACT_ID) REFERENCES ACTOR(ACT_ID), 
-FOREIGN KEY (MOV_ID) REFERENCES MOVIES(MOV_ID)); 
-CREATE TABLE MOVIECAST( 
-ACT_ID INTEGER, 
-MOV_ID INTEGER, 
-ROLE VARCHAR(10), 
-PRIMARY KEY (ACT_ID,MOV_ID), 
-FOREIGN KEY (ACT_ID) REFERENCES ACTOR(ACT_ID), 
-FOREIGN KEY (MOV_ID) REFERENCES MOVIES(MOV_ID)); 
-DESC MOVIECAST; 
-CREATE TABLE RATING( 
-MOV_ID INTEGER, 
-REVSTARS VARCHAR(25), 
-PRIMARY KEY(MOV_ID), 
-FOREIGN KEY (MOV_ID) REFERENCES MOVIES(MOV_ID)); 
-DESC RATING; 
-INSERT INTO ACTOR VALUES(301,'ANUSHKA','F'); 
-INSERT INTO ACTOR VALUES(302,'PRABHAS','M'); 
-INSERT INTO ACTOR VALUES(303,'PUNITH','M'); 
-INSERT INTO ACTOR VALUES(304,'SUDEEP','M'); 
-SELECT * FROM ACTOR; 
-INSERT INTO DIRECTOR VALUES(60,'RAJAMOULI',919); 
-INSERT INTO DIRECTOR VALUES(61,'HITCHCOCK',818); 
-INSERT INTO DIRECTOR VALUES(62,'FARAN',717); 
-INSERT INTO DIRECTOR VALUES(63,'STEVEN SPIELBERG',616); 
-SELECT * FROM DIRECTOR; 
-INSERT INTO MOVIES VALUES(1001,'BAHUBALI-2',2017,'TELUGU',60); 
-INSERT INTO MOVIES VALUES(1002,'BAHUBALI-1',2015,'TELUGU',60); 
-INSERT INTO MOVIES VALUES(1003,'AKASH',2008,'KANADA',61); 
-INSERT INTO MOVIES VALUES(1004,'WAR HORSE',2011,'ENGLISH',63); 
-SELECT * FROM MOVIES; 
-INSERT INTO MOVIECAST VALUES(301,1002,'HEROINE'); 
-INSERT INTO MOVIECAST VALUES(301,1001,'HEROINE'); 
-INSERT INTO MOVIECAST VALUES(303,1003,'HERO'); 
-INSERT INTO MOVIECAST VALUES(303,1002,'GUEST'); 
-INSERT INTO MOVIECAST VALUES(304,1004,'HERO'); 
-SELECT * FROM MOVIECAST; 
-INSERT INTO RATING VALUES(1001,4); 
-INSERT INTO RATING VALUES(1002,2); 
-INSERT INTO RATING VALUES(1003,5); 
-INSERT INTO RATING VALUES(1004,4); 
-SELECT * FROM RATING; -- QUERY 1 
-1. List the titles of all movies directed by ‘Hitchcock’. 
-SELECT MOV_TITLE 
-FROM MOVIES 
-WHERE DIR_ID IN (SELECT DIR_ID 
-FROM DIRECTOR 
-WHERE DIR_NAME='HITCHCOCK'); 
-2. Find the movie names where one or more actors acted in two or more movies. 
-SELECT MOV_TITLE 
-FROM MOVIES M,MOVIECAST MV 
-WHERE M.MOV_ID=MV.MOV_ID AND ACT_ID IN  
-(SELECT ACT_ID FROM MOVIECAST GROUP BY ACT_ID HAVING COUNT(ACT_ID)>1) 
-GROUP BY MOV_TITLE 
-HAVING COUNT(*)>1; 
-3. List all actors who acted in a movie before 2000 and also in a movie after 2015 (use 
-JOIN operation). 
-SELECT A.ACT_NAME,C.MOV_TITLE,C.MOV_YEAR 
-FROM ACTOR1 A,MOVIECAST B,MOVIES C 
-WHERE A.ACT_ID=B.ACT_ID 
-AND B.MOV_ID=C.MOV_ID 
-AND C.MOV_YEAR NOT BETWEEN 2000 AND 2005; 
-4. Find the title of movies and number of stars for each movie that has at least 
-one rating and find the highest number of stars that movie received. Sort 
-the result by movie title. 
-SELECT MOV_TITLE, MAX(REVSTARS) 
-FROM MOVIES 
-INNER JOIN RATING USING (MOV_ID) 
-GROUP BY MOV_TITLE 
-HAVING MAX(REVSTARS)>0 
-ORDER BY MOV_TITLE; 
-5. Update rating of all movies directed by ‘Steven Spielberg’ to 5. 
-UPDATE RATING SET REVSTARS=5 
-WHERE MOV_ID IN (SELECT MOV_ID FROM 
-MOVIES WHERE DIR_ID IN (SELECT DIR_ID 
-FROM DIRECTOR WHERE DIR_NAME='STEVEN SPIELBERG ')); 
-SELECT * FROM RATING;
+Experiment 7 
+Title: Write a program to implement FIR filter using Kaiser Window. 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg = 1.2*sin(2*pi*1.5*t) + 0.6*sin(2*pi*60*t) + 0.1*randn(size(t)); 
+fc = 40; 
+wc = 2*pi*fc/fs; 
+A = 60; 
+if A > 50 
+beta = 0.1102*(A - 8.7); 
+elseif A >= 21 
+beta = 0.5842*(A - 21)^0.4 + 0.07886*(A - 21); 
+else 
+beta = 0; 
+end 
+delta_f = 5; 
+N = ceil((A - 8) / (2.285 * 2 * pi * delta_f / fs)); 
+if mod(N,2)==0 
+N = N + 1; 
+end 
+n = 0:N-1; 
+alpha = (N - 1)/2; 
+h = sin(wc*(n - alpha)) ./ (pi*(n - alpha)); 
+h(alpha+1) = wc/pi; 
+w = kaiser(N, beta)'; 
+h = h .* w; 
+h = h / sum(h); 
+ecg_fir = conv(ecg, h, 'same'); 
+plot(t, ecg, 'b'); hold on; 
+plot(t, ecg_fir, 'r'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+title('FIR Filtered ECG using Kaiser Window'); 
+legend('Original ECG','Filtered ECG'); 
+grid on; 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
 
 
+Experiment 8 
+Title: Write a program to detect QRS complex and measure the heart rate of a given 
+ECG signal. 
+Program Code: 
+% Complete MATLAB program for QRS detection and heart rate calculation 
+clear; close all; clc; 
+%% Parameters 
+fs = 360;              
+duration = 10;        
+% Sampling frequency (Hz) 
+ % Duration of signal in seconds 
+t = 0:1/fs:duration;   % Time vector 
+%% Generate synthetic ECG-like signal for testing 
+% Base heart rate ~72 bpm (1.2 Hz) 
+ecg_signal = 0.6*sin(2*pi*1.2*t); 
+% Add some noise 
+ecg_signal = ecg_signal + 0.05*randn(size(t)); 
+%% Step 1: Bandpass filter (5-15 Hz) 
+bpFilt = designfilt('bandpassiir','FilterOrder',2, ... 
+'HalfPowerFrequency1',5,'HalfPowerFrequency2',15, ... 
+'SampleRate',fs); 
+filtered_ecg = filtfilt(bpFilt, ecg_signal); 
+%% Step 2: Differentiate 
+diff_ecg = diff(filtered_ecg); 
+diff_ecg(end+1) = 0; % keep length same 
+%% Step 3: Square the signal 
+squared_ecg = diff_ecg .^ 2; 
+%% Step 4: Moving window integration (150 ms window) 
+window_size = round(0.15 * fs); 
+integrated_ecg = conv(squared_ecg, ones(1,window_size)/window_size, 'same'); 
+%% Step 5: Detect peaks on integrated signal 
+min_distance = round(0.25 * fs); % Minimum distance between peaks (250 ms) 
+threshold = mean(integrated_ecg); % Simple threshold 
+[peaks, locs] = findpeaks(integrated_ecg, 'MinPeakDistance', min_distance, 
+'MinPeakHeight', threshold); 
+qrs_peaks = locs; 
+%% Step 6: Calculate heart rate 
+rr_intervals = diff(qrs_peaks) / fs; % RR intervals in seconds 
+heart_rate = 60 ./ rr_intervals;      
+% bpm 
+%% Display results 
+fprintf('Detected QRS peak indices:\n'); 
+disp(qrs_peaks); 
+fprintf('Instantaneous Heart Rates (bpm):\n'); 
+disp(heart_rate); 
+%% Step 7: Plot results 
+figure; 
+plot(t, ecg_signal, 'b'); 
+hold on; 
+plot(t(qrs_peaks), ecg_signal(qrs_peaks), 'ro', 'MarkerSize', 8, 'LineWidth', 2); 
+xlabel('Time (s)'); 
+ylabel('ECG Amplitude'); 
+title('Synthetic ECG Signal with Detected QRS Complexes'); 
+legend('ECG Signal', 'Detected QRS Peaks'); 
+grid on; 
+Output: 
+In the command window 
+Result: The expected output is verified and the objective of the experiment is achieved.
 
-Library database
---Create Table PUBLISHER with Primary Key as NAME 
-CREATE TABLE PUBLISHER 
-(NAME VARCHAR(20) PRIMARY KEY, PHONE INTEGER, ADDRESS 
-VARCHAR(20)); 
-DESC PUBLISHER; ---------------------------------- --Create Table BOOK with Primary Key as BOOK_ID and Foreign Key PUB_NAME 
-referring the PUBLISHER table 
-CREATE TABLE BOOK (BOOK_ID INTEGER PRIMARY KEY, TITLE 
-VARCHAR(20), PUB_YEAR VARCHAR (20),PUBLISHER_NAME VARCHAR (20), 
-Foreign key(PUBLISHER_NAME) REFERENCES PUBLISHER (NAME) ON DELETE 
-CASCADE); 
-DESC BOOK; 
----------------------------------- --Create Table BOOK_AUTHORS with Primary Key as BOOK_ID and 
-AUTHOR_NAME and Foreign Key BOOK_ID referring the BOOK table 
-CREATE TABLE BOOK_AUTHORS (AUTHOR_NAME VARCHAR(20), BOOK_ID 
-INTEGER, 
-Foreign key (BOOK_ID) REFERENCES BOOK (BOOK_ID) ON DELETE CASCADE, 
-PRIMARY KEY (BOOK_ID, AUTHOR_NAME)); 
-DESC BOOK_AUTHORS; ---------------------------------- 
-CREATE TABLE LIBRARY_BRANCH (BRANCH_ID INTEGER PRIMARY KEY, 
-BRANCH_NAME VARCHAR (50), 
-ADDRESS VARCHAR (50)); ---------------------------------- --Create Table as BOOK_COPIES with Primary Key as BOOK_ID , BRANCH_ID 
-CREATE TABLE BOOK_COPIES (NO_OF_COPIES INTEGER, BOOK_ID 
-INTEGER, 
-BRANCH_ID INTEGER,  
-FOREIGN KEY(BOOK_ID) REFERENCES BOOK(BOOK_ID) ON DELETE CASCADE, 
-FOREIGN KEY(BRANCH_ID) REFERENCES 
-LIBRARY_BRANCH(BRANCH_ID) ON DELETE CASCADE,PRIMARY KEY 
-(BOOK_ID, BRANCH_ID)); 
-DESC BOOK_COPIES; ---------------------------------- -- Create Table CARD with Primary Key as CARD_NO 
-CREATE TABLE CARD 
-(CARD_NO INTEGER PRIMARY KEY); 
-DESC CARD; ---------------------------------- -- Create Table BOOK_LENDING With Primary Key as BOOK_ID, BRANCH_ID and 
-CARD_NO and Foreign key as BOOK_ID, BRANCH _ID and CARD_NO referring the 
-BOOK, LIBRARY_PROGRAMME and CARD tables respectively 
-CREATE TABLE BOOK_LENDING (DATE_OUT DATE, DUE_DATE DATE, 
-BOOK_ID INTEGER, BRANCH_ID INTEGER, CARD_NO INTEGER, 
-FOREIGN KEY(BOOK_ID) REFERENCES BOOK (BOOK_ID) ON DELETE CASCADE, 
-FOREIGN KEY(BRANCH_ID) REFERENCES 
-LIBRARY_BRANCH(BRANCH_ID) ON DELETE CASCADE, 
-FOREIGN KEY(CARD_NO) REFERENCES CARD (CARD_NO) ON DELETE 
-CASCADE, PRIMARY KEY (BOOK_ID, BRANCH_ID, CARD_NO)); 
-DESC BOOKLENDING; ---------------------------------- 
-Insertion of values to tables --Inserting records into PUBLISHER table 
-INSERT INTO PUBLISHER VALUES('MCGRAW-HILL',423,'BANGALORE'); 
-INSERT INTO PUBLISHER VALUES('PEARSON',818,'NEWDELHI'); 
-INSERT INTO PUBLISHER VALUES('RANDOM HOUSE',717,'HYDERABAD'); 
-INSERT INTO PUBLISHER VALUES('LIVRE',616,'CHENNAI'); 
-INSERT INTO PUBLISHER VALUES('PLANETA',515,'BANGALORE'); 
-SELECT * FROM PUBLISHER; --Inserting records into BOOK VALUES table 
-INSERT INTO BOOK VALUES(1,'DBMS','JAN-2017','MCGRAW-HILL'); 
-INSERT INTO BOOK VALUES(2,'ADBMS','JUN-2016','MCGRAW-HILL'); 
-INSERT INTO BOOK VALUES(3,'CN','SEP-2016','PEARSON'); 
-INSERT INTO BOOK VALUES(4,'CG','SEP-2015','PLANETA'); 
-INSERT INTO BOOK VALUES(5,'OS','MAY-2016','PEARSON'); 
-SELECT * FROM BOOK; --Inserting records into BOOK AUTHORS table 
-INSERT INTO BOOK_AUTHORS VALUES('NAVATHE',1); 
-INSERT INTO BOOK_AUTHORS VALUES('NAVATHE',2); 
-INSERT INTO BOOK_AUTHORS VALUES('TANENBAUM',3); 
-INSERT INTO BOOK_AUTHORS VALUES('EDWARD ANGEL',4); 
-INSERT INTO BOOK_AUTHORS VALUES('GALVIN',5); 
-SELECT * FROM BOOK_AUTHORS; --Inserting records into LIBRARY BRANCH table 
-INSERT INTO LIBRARY_BRANCH VALUES(10,'RR NAGAR','BANGALORE'); 
-INSERT INTO LIBRARY_BRANCH VALUES(11,'RNSIT','BANGALORE'); 
-INSERT INTO LIBRARY_BRANCH VALUES(12,'RAJAJI NAGAR','BANGALORE'); 
-INSERT INTO LIBRARY_BRANCH VALUES(13,'NITTE','MANGALORE'); 
-INSERT INTO LIBRARY_BRANCH VALUES(14,'MANIPAL','UDUPI'); 
-SELECT * FROM LIBRARY_BRANCH; --Inserting records into BOOK_COPIES table 
-INSERT INTO BOOK_COPIES VALUES (10, 1, 10); 
-INSERT INTO BOOK_COPIES VALUES (5, 1, 11); 
-INSERT INTO BOOK_COPIES VALUES (2, 2, 12); 
-INSERT INTO BOOK_COPIES VALUES (5, 2, 13); 
-INSERT INTO BOOK_COPIES VALUES (7, 3, 14); 
-INSERT INTO BOOK_COPIES VALUES (1, 5, 10); 
-INSERT INTO BOOK_COPIES VALUES (3, 4, 11); 
-SELECT * FROM BOOK_COPIES; 
---Inserting records into BOOK LENDING table 
-INSERT INTO BOOK_LENDING VALUES('2017-01-01', '2017-06-01',10,1,101); 
-INSERT INTO BOOK_LENDING VALUES('2017-01-11','2017-03-11',14,3,101); 
-INSERT INTO BOOK_LENDING VALUES('2017-02-21','2017-04-21',13,2,101); 
-INSERT INTO BOOK_LENDING VALUES('2017-03-15','2017-07-15',11,4,101); 
-INSERT INTO BOOK_LENDING VALUES('2017-04-12','2017-05-12',11,1,104); 
-SELECT * FROM BOOK_LENDING; 
-Queries 
-1. Retrieve details of all books in the library – id, title, name of 
-publisher, authors, number of copies in each branch, etc. 
-SELECT B.BOOK_ID, B.TITLE, B.PUBLISHER_NAME, A.AUTHOR_NAME, 
-C.NO_OF_COPIES, L.BRANCH_ID 
-FROM BOOK B, BOOK_AUTHORS A, BOOK_COPIES C, 
-LIBRARY_BRANCH L  
-WHERE B.BOOK_ID=A.BOOK_ID 
-AND B.BOOK_ID=C.BOOK_ID 
-AND L.BRANCH_ID=C.BRANCH_ID; 
-2. Get the particulars of borrowers who have borrowed more than 3 
-books, but from Jan 2017 to Jun 2017. 
-SELECT CARD_NO FROM BOOK_LENDING WHERE DATE_OUT BETWEEN '2017-01-01' 
-AND '2017-07-01' GROUP BY CARD_NO HAVING COUNT(*) > 3; 
-3. Delete a book in BOOK table. Update the contents of other tables to reflect this 
-data manipulation operation. 
-DELETE FROM BOOK WHERE BOOK_ID=3; 
-select * from book; 
-4. Partition the BOOK table based on year of publication. Demonstrate 
-its working with a simple query. 
-CREATE VIEW V_PUBLICATION AS SELECT PUB_YEAR FROM BOOK; 
-select * from V_Publication; 
-5. Create a view of all books and its number of copies that are 
-currently available in the Library. 
-CREATE VIEW V_BOOKS AS 
-SELECT B.BOOK_ID, B.TITLE, C.NO_OF_COPIES 
-FROM BOOK B, BOOK_COPIES1 C, LIBRARY_BRANCH L WHERE 
-B.BOOK_ID=C.BOOK_ID 
-AND C.BRANCH_ID=L.BRANCH_ID;
+
+Experiment 9 
+Title: . Write a program to improve the SNR using signal averaging technique. 
+Program Code: 
+clc; 
+clear; 
+num_trials = 100; 
+signal_length = 500; 
+fs = 1000; 
+t = (0:signal_length-1)/fs; 
+f = 5; 
+true_signal = sin(2*pi*f*t); 
+noisy_signals = zeros(num_trials, signal_length); 
+for i = 1:num_trials 
+noise = randn(1, signal_length); 
+noisy_signals(i, :) = true_signal + noise; 
+end 
+averaged_signal = mean(noisy_signals, 1); 
+figure; 
+subplot(2, 1, 1); 
+plot(t, noisy_signals(1, :), 'r'); 
+hold on; 
+plot(t, true_signal, 'k--'); 
+title('Single Noisy Signal vs True Signal'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+legend('Noisy Signal', 'True Signal'); 
+grid on; 
+subplot(2, 1, 2); 
+plot(t, averaged_signal, 'b'); 
+hold on; 
+plot(t, true_signal, 'k--'); 
+title(['Averaged Signal (', num2str(num_trials), ' trials) vs True Signal']); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+legend('Averaged Signal', 'True Signal'); 
+grid on; 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 10 
+Title: Write a program to obtain the DCT & IDCT of ECG signal 
+Program code: 
+clc; 
+clear; 
+fs = 360; 
+t = 0:1/fs:1; 
+ecg_signal = ecg(length(t))'; 
+dct_signal = dct(ecg_signal); 
+reconstructed_ecg = idct(dct_signal); 
+figure; 
+subplot(3,1,1); 
+plot(t, ecg_signal); 
+title('Original ECG Signal'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(3,1,2); 
+stem(dct_signal, 'Marker', 'none'); 
+title('DCT of ECG Signal'); 
+xlabel('Coefficient Index'); 
+ylabel('Amplitude'); 
+subplot(3,1,3); 
+plot(t, reconstructed_ecg); 
+title('Reconstructed ECG Signal using IDCT'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
