@@ -1,219 +1,348 @@
-Experiment 6 
-Title: Write a program to Implement Low-Pass FIR filter for ECG. 
-Program Code: 
-fs = 500;                      
-t = 0:1/fs:10;                
-% Sampling frequency (Hz) 
- % Time vector for 10 seconds 
-ecg = 1.2*sin(2*pi*1.7*t) + 0.5*sin(2*pi*60*t) + 0.1*randn(size(t));  % Simulated 
-ECG + 60Hz noise 
-fc = 40;                      
-N = 51;                        
-n = 0:N-1;                    
- % Cutoff frequency (Hz) 
-% Filter order (odd number for symmetric FIR) 
- % Filter sample indices 
-% Ideal impulse response of low-pass filter (sinc function) 
-wc = 2*pi*fc/fs; 
-h = sin(wc*(n - (N-1)/2)) ./ (pi*(n - (N-1)/2)); 
-h((N-1)/2 + 1) = wc / pi;      
-% Handle division by zero at center 
-% Apply window (Hann window) 
-w = hann(N)'; 
-h = h .* w; 
-% Normalize filter coefficients 
-h = h / sum(h); 
-% Filter ECG signal using convolution 
-ecg_filtered = conv(ecg, h, 'same'); 
-% Plot the results 
-figure; 
-plot(t, ecg, 'b'); hold on; 
-plot(t, ecg_filtered, 'r'); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-title('Low-Pass FIR Filtered ECG'); 
-legend('Original ECG', 'Filtered ECG'); 
-grid on; 
-load ecg; 
-fs = 360; 
-order = 20; 
-cutoff = 0.1; 
-b = fir1(order, cutoff); 
-y = filter(b, 1, ecg); 
-plot(y); 
-Output: 
-Result: 
-The expected output is verified and the objective of the experiment is achieved. 
+%// Program 1: Write a program to read a digital image. Split and display image into 4 quadrants, up, down, right and left
+
+img = imread('C:\Users\Divyashreenivas\OneDrive\Documents\Divya Chilli Disease photos\cp0\1.jpg');
+% Display the original image
+figure;
+imshow(img);
+title('Original Image');
+
+% Get the dimensions of the image
+[rows, cols, channels] = size(img);
+
+% Calculate the split points for rows and columns
+% Use floor to handle cases with odd dimensions, ensuring integer indices
+mid_row = floor(rows / 2);
+mid_col = floor(cols / 2);
+
+% --- Split the image into four quadrants ---
+
+% Quadrant 1: Top-Left (Up-Left)
+% Rows 1 to mid_row, Columns 1 to mid_col
+quad1 = img(1:mid_row, 1:mid_col, :);
+
+% Quadrant 2: Top-Right (Up-Right)
+% Rows 1 to mid_row, Columns mid_col+1 to end
+quad2 = img(1:mid_row, mid_col+1:end, :);
+
+% Quadrant 3: Bottom-Left (Down-Left)
+% Rows mid_row+1 to end, Columns 1 to mid_col
+quad3 = img(mid_row+1:end, 1:mid_col, :);
+
+% Quadrant 4: Bottom-Right (Down-Right)
+% Rows mid_row+1 to end, Columns mid_col+1 to end
+quad4 = img(mid_row+1:end, mid_col+1:end, :);
+
+% --- Display the four quadrants ---
+
+figure;
+
+% Display Top-Left (Up)
+subplot(2, 2, 1);
+imshow(quad1);
+title('Top-Left Quadrant (Up)');
+
+% Display Top-Right (Right side of top half)
+subplot(2, 2, 2);
+imshow(quad2);
+title('Top-Right Quadrant (Right)');
+
+% Display Bottom-Left (Left side of bottom half)
+subplot(2, 2, 3);
+imshow(quad3);
+title('Bottom-Left Quadrant (Left)');
+
+% Display Bottom-Right (Down)
+subplot(2, 2, 4);
+imshow(quad4);
+title('Bottom-Right Quadrant (Down)');
+
+***************************************************
 
 
-Experiment 7 
-Title: Write a program to implement FIR filter using Kaiser Window. 
-Program Code: 
-fs = 500; 
-t = 0:1/fs:10; 
-ecg = 1.2*sin(2*pi*1.5*t) + 0.6*sin(2*pi*60*t) + 0.1*randn(size(t)); 
-fc = 40; 
-wc = 2*pi*fc/fs; 
-A = 60; 
-if A > 50 
-beta = 0.1102*(A - 8.7); 
-elseif A >= 21 
-beta = 0.5842*(A - 21)^0.4 + 0.07886*(A - 21); 
-else 
-beta = 0; 
-end 
-delta_f = 5; 
-N = ceil((A - 8) / (2.285 * 2 * pi * delta_f / fs)); 
-if mod(N,2)==0 
-N = N + 1; 
-end 
-n = 0:N-1; 
-alpha = (N - 1)/2; 
-h = sin(wc*(n - alpha)) ./ (pi*(n - alpha)); 
-h(alpha+1) = wc/pi; 
-w = kaiser(N, beta)'; 
-h = h .* w; 
-h = h / sum(h); 
-ecg_fir = conv(ecg, h, 'same'); 
-plot(t, ecg, 'b'); hold on; 
-plot(t, ecg_fir, 'r'); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-title('FIR Filtered ECG using Kaiser Window'); 
-legend('Original ECG','Filtered ECG'); 
-grid on; 
-Output: 
-Result: 
-The expected output is verified and the objective of the experiment is achieved. 
+% //Program 2: Write a program to show Rotation, Scaling and Translation of an image
+
+close all;
+clear all;
+I=imread('C:\Users\USER\Pictures\Screenshots\image1.png');
+figure,subplot(2,2,1);imshow(I);title('Original Image');
+
+%Shrink the image by a factor of two.
+original = imresize(I, [256 256]);
+ subplot(2,2,2);imshow(original);title('Scaled original Image');
+
+% Create a distorted version of the image by resizing and rotating the image. 
+% Note that imrotate rotates images in a counterclockwise direction when you specify a positive angle of rotation.
 
 
-Experiment 8 
-Title: Write a program to detect QRS complex and measure the heart rate of a given 
-ECG signal. 
-Program Code: 
-% Complete MATLAB program for QRS detection and heart rate calculation 
-clear; close all; clc; 
-%% Parameters 
-fs = 360;              
-duration = 10;        
-% Sampling frequency (Hz) 
- % Duration of signal in seconds 
-t = 0:1/fs:duration;   % Time vector 
-%% Generate synthetic ECG-like signal for testing 
-% Base heart rate ~72 bpm (1.2 Hz) 
-ecg_signal = 0.6*sin(2*pi*1.2*t); 
-% Add some noise 
-ecg_signal = ecg_signal + 0.05*randn(size(t)); 
-%% Step 1: Bandpass filter (5-15 Hz) 
-bpFilt = designfilt('bandpassiir','FilterOrder',2, ... 
-'HalfPowerFrequency1',5,'HalfPowerFrequency2',15, ... 
-'SampleRate',fs); 
-filtered_ecg = filtfilt(bpFilt, ecg_signal); 
-%% Step 2: Differentiate 
-diff_ecg = diff(filtered_ecg); 
-diff_ecg(end+1) = 0; % keep length same 
-%% Step 3: Square the signal 
-squared_ecg = diff_ecg .^ 2; 
-%% Step 4: Moving window integration (150 ms window) 
-window_size = round(0.15 * fs); 
-integrated_ecg = conv(squared_ecg, ones(1,window_size)/window_size, 'same'); 
-%% Step 5: Detect peaks on integrated signal 
-min_distance = round(0.25 * fs); % Minimum distance between peaks (250 ms) 
-threshold = mean(integrated_ecg); % Simple threshold 
-[peaks, locs] = findpeaks(integrated_ecg, 'MinPeakDistance', min_distance, 
-'MinPeakHeight', threshold); 
-qrs_peaks = locs; 
-%% Step 6: Calculate heart rate 
-rr_intervals = diff(qrs_peaks) / fs; % RR intervals in seconds 
-heart_rate = 60 ./ rr_intervals;      
-% bpm 
-%% Display results 
-fprintf('Detected QRS peak indices:\n'); 
-disp(qrs_peaks); 
-fprintf('Instantaneous Heart Rates (bpm):\n'); 
-disp(heart_rate); 
-%% Step 7: Plot results 
-figure; 
-plot(t, ecg_signal, 'b'); 
-hold on; 
-plot(t(qrs_peaks), ecg_signal(qrs_peaks), 'ro', 'MarkerSize', 8, 'LineWidth', 2); 
-xlabel('Time (s)'); 
-ylabel('ECG Amplitude'); 
-title('Synthetic ECG Signal with Detected QRS Complexes'); 
-legend('ECG Signal', 'Detected QRS Peaks'); 
-grid on; 
-Output: 
-In the command window 
-Result: The expected output is verified and the objective of the experiment is achieved.
+scaleFactor = 0.7;
+distorted = imresize(original,scaleFactor);// scaling factor applied to both width and height
+
+theta = 30;
+distorted = imrotate(distorted,theta);
+subplot(2,2,3);imshow(distorted);title('Rotated Image');
+
+%Translate the image, shifting the image by 15 pixels in the x-direction and 25 pixels in the y-direction.
+% Note that, by default, imtranslate displays the translated image within the boundaries (or limits) of the original 256-by-256 image.
+% This results in some of the translated image being clipped.
+J = imtranslate(original,[15, 25]);
+subplot(2,2,4);imshow(J) 
+title('Translated Image');
+
+***********************************************************
+
+%//Program 3:Read an image, first apply erosion to the image and then subtract the result from the original. Demonstrate the difference in the edge image if you use dilation instead of erosion.
+clc; clear; close all;
+I= imread('C:\Users\USER\Desktop\cat.jpg');
+
+% Read image
+% I = imread('camersaman.tif');   % You can replace with your own image
+if size(I,3) == 3
+    I = rgb2gray(I);
+end
+
+I = im2uint8(I);   % Ensure correct type
+
+% Structuring element
+se = strel('disk', 2);
+
+% Morphological erosion                      
+I_eroded = imerode(I, se);
+
+% Edge image using erosion
+edge_erosion = imsubtract(I, I_eroded);
+
+% Morphological dilation
+I_dilated = imdilate(I, se);
+
+% Edge image using dilation
+edge_dilation = imsubtract(I_dilated, I);
+
+% Display results
+figure;
+
+subplot(2,3,1), imshow(I), title('Original Image')
+subplot(2,3,2), imshow(I_eroded), title('Eroded Image')
+subplot(2,3,3), imshow(edge_erosion), title('Edge (Original - Erosion)')
+
+subplot(2,3,4), imshow(I), title('Original Image')
+subplot(2,3,5), imshow(I_dilated), title('Dilated Image')
+subplot(2,3,6), imshow(edge_dilation), title('Edge (Dilation - Original)')
+
+****************************************************************************************
 
 
-Experiment 9 
-Title: . Write a program to improve the SNR using signal averaging technique. 
-Program Code: 
-clc; 
-clear; 
-num_trials = 100; 
-signal_length = 500; 
-fs = 1000; 
-t = (0:signal_length-1)/fs; 
-f = 5; 
-true_signal = sin(2*pi*f*t); 
-noisy_signals = zeros(num_trials, signal_length); 
-for i = 1:num_trials 
-noise = randn(1, signal_length); 
-noisy_signals(i, :) = true_signal + noise; 
-end 
-averaged_signal = mean(noisy_signals, 1); 
-figure; 
-subplot(2, 1, 1); 
-plot(t, noisy_signals(1, :), 'r'); 
-hold on; 
-plot(t, true_signal, 'k--'); 
-title('Single Noisy Signal vs True Signal'); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-legend('Noisy Signal', 'True Signal'); 
-grid on; 
-subplot(2, 1, 2); 
-plot(t, averaged_signal, 'b'); 
-hold on; 
-plot(t, true_signal, 'k--'); 
-title(['Averaged Signal (', num2str(num_trials), ' trials) vs True Signal']); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-legend('Averaged Signal', 'True Signal'); 
-grid on; 
-Output: 
-Result: 
-The expected output is verified and the objective of the experiment is achieved. 
+%// Program 4:Read an image and extract and display low level features such as edges, texture using filtering techniques
+
+clc; clear; close all;
+% Read the image
+I = imread('C:\Users\USER\Pictures\Screenshots\input file\2.png');   % grayscale image
+
+% Convert to gray if it is gray scale.
+
+if size(I,3) == 3
+    Igray = rgb2gray(I);
+else
+    Igray = I;
+end
+
+Igray = im2double(Igray);
+
+%% a) Edge Detection
+% Sobel Edge Detection
+
+edge_sobel = edge(Igray, 'sobel');
+
+% Prewitt Edge Detection
+
+edge_prewitt = edge(Igray, 'prewitt');
+
+% Canny Edge Detection
+
+edge_canny = edge(Igray, 'canny');
+
+%% b) Texture Extraction using Filtering
+
+% Laplacian Filter (Second-order derivative)
+
+laplacian_filter = fspecial('laplacian', 0.2);//0.2 is the alpha parameter, which controls the shape or characteristics of the Laplacian filter
+laplacian_img = imfilter(Igray, laplacian_filter, 'replicate'); //'replicate' handles the border pixels of the image during filtering. It replicates the border pixel values to create the necessary padding around the image, which helps in processing the edges of the image seamlessly. 
+
+% Gaussian Smoothing (to highlight texture at different scales)
+
+gaussian_filter = fspecial('gaussian', [5 5], 1);
+smooth_img = imfilter(Igray, gaussian_filter, 'replicate');
+
+% Sobel Gradient Magnitude (another texture measure)
+[Gx, Gy] = imgradientxy(Igray, 'sobel');//This command computes the directional gradients of the grayscale image Igray. Gx contains the gradients in the x-direction (horizontal changes), and Gy contains the gradients in the y-direction (vertical changes) [1]. The 'sobel' argument specifies that the Sobel approximation should be used for this calculation
+grad_mag = sqrt(Gx.^2 + Gy.^2);//This command calculates the magnitude of the gradient at each pixel. It applies the Pythagorean theorem (\(a^{2}+b^{2}=c^{2}\)) to the x and y components of the gradient, resulting in the overall strength (magnitude) of the intensity change at each pixel [1]. This final result, grad_mag, is a matrix representing the edge strength across the entire image. 
+
+%% Display Results
+figure;
+
+subplot(3,3,1), imshow(I), title('Original Image');
+subplot(3,3,2), imshow(edge_sobel), title('Sobel Edges');
+subplot(3,3,3), imshow(edge_prewitt), title('Prewitt Edges');
+subplot(3,3,4), imshow(edge_canny), title('Canny Edges');
+subplot(3,3,5), imshow(laplacian_img, []), title('Laplacian Filter');
+subplot(3,3,6), imshow(smooth_img), title('Gaussian Smoothing');
+subplot(3,3,7), imshow(grad_mag, []), title('Gradient Magnitude (Sobel)');
+
+*****************************************************************************************
+
+%// Program 5:Demostrate enhancing and segmenting low contrast 2D images
+
+% Read and Display a Low-Contrast Image
+
+clc; clear; close all;
+
+I = imread('C:\Users\USER\Pictures\Screenshots\input file\2.png');   % grayscale image
+if size(I,3) == 3
+ I = rgb2gray(I);
+end
+
+figure, imshow(I), title('Original Low-Contrast Image');
+
+%A)Image Enhancement Methods
+
+%a)Increase and decrease the contrast of an image and display
+
+% Specify a scaling factor
+S1 = 1.5;	% Increase brightness
+
+S2 = 0.7;	% Decrease brightness
+
+% Scale the input image to adjust the brightness
+
+brightened_img = I * S1;
+darker_img = I * S2;
+
+% Adjust pixel values to the valid range
+
+brightened_img = max(0, min(brightened_img, 255));
+darker_img = max(0, min(darker_img, 255));
+
+% Convert to uint8 format to display
+
+brightened_img = uint8(brightened_img);
+darker_img = uint8(darker_img);
+
+% Display the input, brightened, and darker images
+figure;
+subplot(1, 3, 1);
+imshow(I);
+title('Input Image');
+subplot(1, 3, 2);
+imshow(brightened_img);
+title('Brightened Image');
+
+subplot(1, 3, 3);
+imshow(darker_img);
+title('Darker Image');
+
+% (b) Histogram Equalization
+I_histeq = histeq(I);
+figure, imshow(I_histeq), title('Histogram Equalization');
+
+% (c) Adaptive Histogram Equalization (CLAHE – Best for Low Contrast)
+I_adapthisteq = adapthisteq(I);
+
+figure, imshow(I_adapthisteq), title('Adaptive Histogram Equalization');
 
 
-Experiment 10 
-Title: Write a program to obtain the DCT & IDCT of ECG signal 
-Program code: 
-clc; 
-clear; 
-fs = 360; 
-t = 0:1/fs:1; 
-ecg_signal = ecg(length(t))'; 
-dct_signal = dct(ecg_signal); 
-reconstructed_ecg = idct(dct_signal); 
-figure; 
-subplot(3,1,1); 
-plot(t, ecg_signal); 
-title('Original ECG Signal'); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-subplot(3,1,2); 
-stem(dct_signal, 'Marker', 'none'); 
-title('DCT of ECG Signal'); 
-xlabel('Coefficient Index'); 
-ylabel('Amplitude'); 
-subplot(3,1,3); 
-plot(t, reconstructed_ecg); 
-title('Reconstructed ECG Signal using IDCT'); 
-xlabel('Time (s)'); 
-ylabel('Amplitude'); 
-Output: 
-Result: 
-The expected output is verified and the objective of the experiment is achieved. 
+% B) Implement spatial image enhancement function (Point operation)
+
+% (a) Negative
+  % Read image
+if size(I,3) == 3
+    I = rgb2gray(I);       % Convert to grayscale if needed
+end
+
+neg = 255 - I;             % Image negative
+imshow(neg);
+title('Negative Image');
+
+% (b) Log transformation for a grayscale image
+
+
+if size(I,3) == 3
+    I = rgb2gray(I);      % Convert to grayscale
+end
+
+I = double(I);            % Convert to double
+c = 255 / log(1 + max(I(:)));
+logImg = c * log(1 + I);
+logImg = uint8(logImg);   % Convert back to uint8
+imshow(logImg);
+title('Log Transformed Image');
+
+% (c) Power law transformation
+
+if size(I,3) == 3
+    I = rgb2gray(I);       % Convert to grayscale
+end
+
+I = im2double(I);          % Normalize to [0,1]
+gamma = 1.1;               % <1 brightens, >1 darkens
+c = 1;
+powerImg = c * (I .^ gamma);
+imshow(powerImg);
+title(['Power Law Transformation, \gamma = ' num2str(gamma)]);
+
+% C) smoothening spatial filter
+
+% a) Average (Mean) filter
+
+I = im2double(I);
+h = fspecial('average', [3 3]);   % 3×3 mean filter
+smoothImg = imfilter(I, h, 'replicate');
+imshow(smoothImg);
+title('Mean Filter (3×3)');
+
+% b) box filter
+
+h = ones(5,5) / 25;    % 5×5 box filter
+smoothImg = imfilter(I, h, 'replicate');
+
+imshow(smoothImg);
+title('Box Filter (5×5)');
+
+% c) gaussian filter
+
+I = im2double(I);
+h = fspecial('gaussian', [5 5], 1);  % σ = 1
+smoothImg = imfilter(I, h, 'replicate');
+imshow(smoothImg);
+title('Gaussian Smoothing Filter');
+
+% d) median filter
+
+medianImg = medfilt2(I, [3 3]);
+imshow(medianImg);
+title('Median Filter (3×3)');
+
+% e) min filter
+
+minImg = ordfilt2(I, 1, ones(3,3));   % 1st order → min
+imshow(minImg);
+title('Min Filter');
+
+% f) max filter
+
+maxImg = ordfilt2(I, 9, ones(3,3));   % 9th order → max (3×3)
+imshow(maxImg);
+title('Max Filter');
+
+*****************************************************************************************
+
+% D) Image Segmentation 
+% (a) Global Thresholding (Otsu’s Method)
+level = graythresh(I_adapthisteq);
+BW_otsu = imbinarize(I_adapthisteq, level);
+
+figure, imshow(BW_otsu), title('Otsu Threshold Segmentation');
+
+
+% (b) Edge-Based Segmentation
+edges = edge(I_adapthisteq, 'canny');
+
+figure, imshow(edges), title('Edge-Based Segmentation');
