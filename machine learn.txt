@@ -1,348 +1,225 @@
-%// Program 1: Write a program to read a digital image. Split and display image into 4 quadrants, up, down, right and left
-
-img = imread('C:\Users\Divyashreenivas\OneDrive\Documents\Divya Chilli Disease photos\cp0\1.jpg');
-% Display the original image
-figure;
-imshow(img);
-title('Original Image');
-
-% Get the dimensions of the image
-[rows, cols, channels] = size(img);
-
-% Calculate the split points for rows and columns
-% Use floor to handle cases with odd dimensions, ensuring integer indices
-mid_row = floor(rows / 2);
-mid_col = floor(cols / 2);
-
-% --- Split the image into four quadrants ---
-
-% Quadrant 1: Top-Left (Up-Left)
-% Rows 1 to mid_row, Columns 1 to mid_col
-quad1 = img(1:mid_row, 1:mid_col, :);
-
-% Quadrant 2: Top-Right (Up-Right)
-% Rows 1 to mid_row, Columns mid_col+1 to end
-quad2 = img(1:mid_row, mid_col+1:end, :);
-
-% Quadrant 3: Bottom-Left (Down-Left)
-% Rows mid_row+1 to end, Columns 1 to mid_col
-quad3 = img(mid_row+1:end, 1:mid_col, :);
-
-% Quadrant 4: Bottom-Right (Down-Right)
-% Rows mid_row+1 to end, Columns mid_col+1 to end
-quad4 = img(mid_row+1:end, mid_col+1:end, :);
-
-% --- Display the four quadrants ---
-
-figure;
-
-% Display Top-Left (Up)
-subplot(2, 2, 1);
-imshow(quad1);
-title('Top-Left Quadrant (Up)');
-
-% Display Top-Right (Right side of top half)
-subplot(2, 2, 2);
-imshow(quad2);
-title('Top-Right Quadrant (Right)');
-
-% Display Bottom-Left (Left side of bottom half)
-subplot(2, 2, 3);
-imshow(quad3);
-title('Bottom-Left Quadrant (Left)');
-
-% Display Bottom-Right (Down)
-subplot(2, 2, 4);
-imshow(quad4);
-title('Bottom-Right Quadrant (Down)');
-
-***************************************************
-
-
-% //Program 2: Write a program to show Rotation, Scaling and Translation of an image
-
-close all;
-clear all;
-I=imread('C:\Users\USER\Pictures\Screenshots\image1.png');
-figure,subplot(2,2,1);imshow(I);title('Original Image');
-
-%Shrink the image by a factor of two.
-original = imresize(I, [256 256]);
- subplot(2,2,2);imshow(original);title('Scaled original Image');
-
-% Create a distorted version of the image by resizing and rotating the image. 
-% Note that imrotate rotates images in a counterclockwise direction when you specify a positive angle of rotation.
-
-
-scaleFactor = 0.7;
-distorted = imresize(original,scaleFactor);// scaling factor applied to both width and height
-
-theta = 30;
-distorted = imrotate(distorted,theta);
-subplot(2,2,3);imshow(distorted);title('Rotated Image');
-
-%Translate the image, shifting the image by 15 pixels in the x-direction and 25 pixels in the y-direction.
-% Note that, by default, imtranslate displays the translated image within the boundaries (or limits) of the original 256-by-256 image.
-% This results in some of the translated image being clipped.
-J = imtranslate(original,[15, 25]);
-subplot(2,2,4);imshow(J) 
-title('Translated Image');
-
-***********************************************************
-
-%//Program 3:Read an image, first apply erosion to the image and then subtract the result from the original. Demonstrate the difference in the edge image if you use dilation instead of erosion.
-clc; clear; close all;
-I= imread('C:\Users\USER\Desktop\cat.jpg');
-
-% Read image
-% I = imread('camersaman.tif');   % You can replace with your own image
-if size(I,3) == 3
-    I = rgb2gray(I);
-end
-
-I = im2uint8(I);   % Ensure correct type
-
-% Structuring element
-se = strel('disk', 2);
-
-% Morphological erosion                      
-I_eroded = imerode(I, se);
-
-% Edge image using erosion
-edge_erosion = imsubtract(I, I_eroded);
-
-% Morphological dilation
-I_dilated = imdilate(I, se);
-
-% Edge image using dilation
-edge_dilation = imsubtract(I_dilated, I);
-
-% Display results
-figure;
-
-subplot(2,3,1), imshow(I), title('Original Image')
-subplot(2,3,2), imshow(I_eroded), title('Eroded Image')
-subplot(2,3,3), imshow(edge_erosion), title('Edge (Original - Erosion)')
-
-subplot(2,3,4), imshow(I), title('Original Image')
-subplot(2,3,5), imshow(I_dilated), title('Dilated Image')
-subplot(2,3,6), imshow(edge_dilation), title('Edge (Dilation - Original)')
-
-****************************************************************************************
-
-
-%// Program 4:Read an image and extract and display low level features such as edges, texture using filtering techniques
-
-clc; clear; close all;
-% Read the image
-I = imread('C:\Users\USER\Pictures\Screenshots\input file\2.png');   % grayscale image
-
-% Convert to gray if it is gray scale.
-
-if size(I,3) == 3
-    Igray = rgb2gray(I);
-else
-    Igray = I;
-end
-
-Igray = im2double(Igray);
-
-%% a) Edge Detection
-% Sobel Edge Detection
-
-edge_sobel = edge(Igray, 'sobel');
-
-% Prewitt Edge Detection
-
-edge_prewitt = edge(Igray, 'prewitt');
-
-% Canny Edge Detection
-
-edge_canny = edge(Igray, 'canny');
-
-%% b) Texture Extraction using Filtering
-
-% Laplacian Filter (Second-order derivative)
-
-laplacian_filter = fspecial('laplacian', 0.2);//0.2 is the alpha parameter, which controls the shape or characteristics of the Laplacian filter
-laplacian_img = imfilter(Igray, laplacian_filter, 'replicate'); //'replicate' handles the border pixels of the image during filtering. It replicates the border pixel values to create the necessary padding around the image, which helps in processing the edges of the image seamlessly. 
-
-% Gaussian Smoothing (to highlight texture at different scales)
-
-gaussian_filter = fspecial('gaussian', [5 5], 1);
-smooth_img = imfilter(Igray, gaussian_filter, 'replicate');
-
-% Sobel Gradient Magnitude (another texture measure)
-[Gx, Gy] = imgradientxy(Igray, 'sobel');//This command computes the directional gradients of the grayscale image Igray. Gx contains the gradients in the x-direction (horizontal changes), and Gy contains the gradients in the y-direction (vertical changes) [1]. The 'sobel' argument specifies that the Sobel approximation should be used for this calculation
-grad_mag = sqrt(Gx.^2 + Gy.^2);//This command calculates the magnitude of the gradient at each pixel. It applies the Pythagorean theorem (\(a^{2}+b^{2}=c^{2}\)) to the x and y components of the gradient, resulting in the overall strength (magnitude) of the intensity change at each pixel [1]. This final result, grad_mag, is a matrix representing the edge strength across the entire image. 
-
-%% Display Results
-figure;
-
-subplot(3,3,1), imshow(I), title('Original Image');
-subplot(3,3,2), imshow(edge_sobel), title('Sobel Edges');
-subplot(3,3,3), imshow(edge_prewitt), title('Prewitt Edges');
-subplot(3,3,4), imshow(edge_canny), title('Canny Edges');
-subplot(3,3,5), imshow(laplacian_img, []), title('Laplacian Filter');
-subplot(3,3,6), imshow(smooth_img), title('Gaussian Smoothing');
-subplot(3,3,7), imshow(grad_mag, []), title('Gradient Magnitude (Sobel)');
-
-*****************************************************************************************
-
-%// Program 5:Demostrate enhancing and segmenting low contrast 2D images
-
-% Read and Display a Low-Contrast Image
-
-clc; clear; close all;
-
-I = imread('C:\Users\USER\Pictures\Screenshots\input file\2.png');   % grayscale image
-if size(I,3) == 3
- I = rgb2gray(I);
-end
-
-figure, imshow(I), title('Original Low-Contrast Image');
-
-%A)Image Enhancement Methods
-
-%a)Increase and decrease the contrast of an image and display
-
-% Specify a scaling factor
-S1 = 1.5;	% Increase brightness
-
-S2 = 0.7;	% Decrease brightness
-
-% Scale the input image to adjust the brightness
-
-brightened_img = I * S1;
-darker_img = I * S2;
-
-% Adjust pixel values to the valid range
-
-brightened_img = max(0, min(brightened_img, 255));
-darker_img = max(0, min(darker_img, 255));
-
-% Convert to uint8 format to display
-
-brightened_img = uint8(brightened_img);
-darker_img = uint8(darker_img);
-
-% Display the input, brightened, and darker images
-figure;
-subplot(1, 3, 1);
-imshow(I);
-title('Input Image');
-subplot(1, 3, 2);
-imshow(brightened_img);
-title('Brightened Image');
-
-subplot(1, 3, 3);
-imshow(darker_img);
-title('Darker Image');
-
-% (b) Histogram Equalization
-I_histeq = histeq(I);
-figure, imshow(I_histeq), title('Histogram Equalization');
-
-% (c) Adaptive Histogram Equalization (CLAHE – Best for Low Contrast)
-I_adapthisteq = adapthisteq(I);
-
-figure, imshow(I_adapthisteq), title('Adaptive Histogram Equalization');
-
-
-% B) Implement spatial image enhancement function (Point operation)
-
-% (a) Negative
-  % Read image
-if size(I,3) == 3
-    I = rgb2gray(I);       % Convert to grayscale if needed
-end
-
-neg = 255 - I;             % Image negative
-imshow(neg);
-title('Negative Image');
-
-% (b) Log transformation for a grayscale image
-
-
-if size(I,3) == 3
-    I = rgb2gray(I);      % Convert to grayscale
-end
-
-I = double(I);            % Convert to double
-c = 255 / log(1 + max(I(:)));
-logImg = c * log(1 + I);
-logImg = uint8(logImg);   % Convert back to uint8
-imshow(logImg);
-title('Log Transformed Image');
-
-% (c) Power law transformation
-
-if size(I,3) == 3
-    I = rgb2gray(I);       % Convert to grayscale
-end
-
-I = im2double(I);          % Normalize to [0,1]
-gamma = 1.1;               % <1 brightens, >1 darkens
-c = 1;
-powerImg = c * (I .^ gamma);
-imshow(powerImg);
-title(['Power Law Transformation, \gamma = ' num2str(gamma)]);
-
-% C) smoothening spatial filter
-
-% a) Average (Mean) filter
-
-I = im2double(I);
-h = fspecial('average', [3 3]);   % 3×3 mean filter
-smoothImg = imfilter(I, h, 'replicate');
-imshow(smoothImg);
-title('Mean Filter (3×3)');
-
-% b) box filter
-
-h = ones(5,5) / 25;    % 5×5 box filter
-smoothImg = imfilter(I, h, 'replicate');
-
-imshow(smoothImg);
-title('Box Filter (5×5)');
-
-% c) gaussian filter
-
-I = im2double(I);
-h = fspecial('gaussian', [5 5], 1);  % σ = 1
-smoothImg = imfilter(I, h, 'replicate');
-imshow(smoothImg);
-title('Gaussian Smoothing Filter');
-
-% d) median filter
-
-medianImg = medfilt2(I, [3 3]);
-imshow(medianImg);
-title('Median Filter (3×3)');
-
-% e) min filter
-
-minImg = ordfilt2(I, 1, ones(3,3));   % 1st order → min
-imshow(minImg);
-title('Min Filter');
-
-% f) max filter
-
-maxImg = ordfilt2(I, 9, ones(3,3));   % 9th order → max (3×3)
-imshow(maxImg);
-title('Max Filter');
-
-*****************************************************************************************
-
-% D) Image Segmentation 
-% (a) Global Thresholding (Otsu’s Method)
-level = graythresh(I_adapthisteq);
-BW_otsu = imbinarize(I_adapthisteq, level);
-
-figure, imshow(BW_otsu), title('Otsu Threshold Segmentation');
-
-
-% (b) Edge-Based Segmentation
-edges = edge(I_adapthisteq, 'canny');
-
-figure, imshow(edges), title('Edge-Based Segmentation');
+7. Use the concept of Data Augmentation to increase the data size
+from a single image.
+import cv2
+import numpy as np
+import albumentations as A
+import os
+def augment_image(image_path, output_folder, num_augmented=10):
+"""
+Applies data augmentation techniques to generate multiple variations of an image.
+Parameters:- image_path: Path to the input image.- output_folder: Folder where augmented images will be saved.- num_augmented: Number of augmented images to generate.
+"""
+if not os.path.exists(output_folder):
+os.makedirs(output_folder)
+# The problem was here: ’ss.jpeg’ needed to be a string
+image = cv2.imread(image_path)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Also, you should convert the loaded ’image’
+transform = A.Compose([
+A.HorizontalFlip(p=0.5),
+A.VerticalFlip(p=0.3),
+A.Rotate(limit=30, p=0.5),
+A.RandomBrightnessContrast(p=0.5),
+A.GaussianBlur(blur_limit=(3, 7), p=0.3),
+A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
+])
+for i in range(num_augmented):
+augmented = transform(image=image)
+augmented_image = augmented["image"]
+save_path = os.path.join(output_folder, f"augmented_{i}.jpg")
+cv2.imwrite(save_path, cv2.cvtColor(augmented_image, cv2.COLOR_RGB2BGR))
+print(f"{num_augmented} augmented images saved in {output_folder}")
+# Example Usage
+image_path = "ss.png" # Change this to the actual image path
+output_folder = "augmented_images"
+augment_image(image_path, output_folder, num_augmented=10)
+Output:
+10 augmented images saved in augmented_images
+<ipython-input-6-548755f45b14>:28: UserWarning: Argument(s) ’var_limit’ are not valid for transform GaussNoise
+14
+
+9. Design and implement a CNN model to classify CIFAR10 im
+age dataset. Use Data Augmentation while designing the CNN
+model. Record accuracy corresponding to the number of epochs.
+import tensorflow as tf
+from tensorflow.keras import layers, models
+import matplotlib.pyplot as plt
+# Load MNIST and Fashion-MNIST datasets
+datasets = {
+"MNIST": tf.keras.datasets.mnist.load_data(),
+"Fashion-MNIST": tf.keras.datasets.fashion_mnist.load_data()
+}
+for dataset_name, (data_train, data_test) in datasets.items():
+(x_train, y_train), (x_test, y_test) = data_train, data_test
+# Normalize pixel values (0 to 255-> 0 to 1)
+x_train, x_test = x_train / 255.0, x_test / 255.0
+# Reshape data to fit CNN input format (28x28 images with 1 channel)
+x_train = x_train.reshape(-1, 28, 28, 1)
+x_test = x_test.reshape(-1, 28, 28, 1)
+# Convert labels to categorical format (one-hot encoding)
+y_train = tf.keras.utils.to_categorical(y_train, 10)
+y_test = tf.keras.utils.to_categorical(y_test, 10)
+# Define LeNet-5 model
+model = models.Sequential([
+layers.Conv2D(6, (5, 5), activation=’tanh’, padding=’same’, input_shape=(28, 28, 1)),
+layers.AveragePooling2D((2, 2)),
+layers.Conv2D(16, (5, 5), activation=’tanh’),
+layers.AveragePooling2D((2, 2)),
+layers.Flatten(),
+layers.Dense(120, activation=’tanh’),
+layers.Dense(84, activation=’tanh’),
+layers.Dense(10, activation=’softmax’) # Output layer with 10 classes
+])
+# Compile the model
+model.compile(optimizer=’adam’,
+loss=’categorical_crossentropy’,
+metrics=[’accuracy’])
+# Train the model
+history = model.fit(x_train, y_train, epochs=15, batch_size=128,
+validation_data=(x_test, y_test), verbose=1)
+# Evaluate accuracy
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+print(f"\n{dataset_name} Test Accuracy: {test_acc:.4f}\n")
+17
+# Plot accuracy vs. epochs
+plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
+plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
+plt.xlabel(’Epochs’)
+plt.ylabel(’Accuracy’)
+plt.legend()
+plt.title(f’LeNet-5 Accuracy on {dataset_name}’
+
+10. ImplementthestandardVGG-16&VGG-19CNNarchitecture
+modelstoclassifymulti-categoryimagedatasetsandcheckthe accuracy.
+import tensorflowastf
+from tensorflow.kerasimportlayers,models
+from tensorflow.keras.applicationsimportVGG16,VGG19
+from tensorflow.keras.preprocessing.imageimportImageDataGenerator
+import matplotlib.pyplotasplt
+#Load CIFAR-10dataset(canbereplacedwithMNIST/Fashion-MNIST)
+(x_train,y_train),(x_test,y_test)=tf.keras.datasets.cifar10.load_data()
+#Normalizepixelvalues(0to255->0to1)
+x_train,x_test=x_train/255.0,x_test/255.0
+#Convertlabelstocategoricalformat
+y_train=tf.keras.utils.to_categorical(y_train,10)
+y_test =tf.keras.utils.to_categorical(y_test,10)
+19
+# Data Augmentation
+datagen = ImageDataGenerator(
+rotation_range=15,
+width_shift_range=0.1,
+height_shift_range=0.1,
+horizontal_flip=True,
+zoom_range=0.1
+)
+datagen.fit(x_train)
+# Function to build VGG model
+def build_vgg_model(vgg_type="VGG16"):
+base_model = VGG16(weights=None, include_top=False, input_shape=(32, 32, 3)) if vgg_type == "VGG16" \
+else VGG19(weights=None, include_top=False, input_shape=(32, 32, 3))
+model = models.Sequential([
+base_model,
+layers.Flatten(),
+layers.Dense(512, activation=’relu’),
+layers.Dropout(0.5),
+layers.Dense(10, activation=’softmax’)
+])
+model.compile(optimizer=’adam’,
+loss=’categorical_crossentropy’,
+metrics=[’accuracy’])
+return model
+# Train and evaluate both VGG models
+for vgg_type in ["VGG16", "VGG19"]:
+print(f"\nTraining {vgg_type} Model...\n")
+model = build_vgg_model(vgg_type)
+history = model.fit(datagen.flow(x_train, y_train, batch_size=64),
+validation_data=(x_test, y_test),
+epochs=20, verbose=1)
+# Evaluate test accuracy
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+print(f"\n{vgg_type} Test Accuracy: {test_acc:.4f}\n")
+# Plot accuracy vs. epochs
+plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
+plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
+plt.xlabel(’Epochs’)
+plt.ylabel(’Accuracy’)
+plt.legend()
+plt.title(f’Accuracy of {vgg_type} on CIFAR-10’)
+plt.show()
+A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
+
+11. Implement RNN for sentiment analysis on movie reviews.
+21
+import tensorflow as tf
+from tensorflow.keras import layers, models, preprocessing
+import matplotlib.pyplot as plt
+# Load IMDb dataset
+vocab_size = 10000 # Limit vocabulary size
+max_length = 200 # Pad sequences to this length
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.imdb.load_data(num_words=vocab_size)
+# Pad sequences to ensure uniform length
+x_train = preprocessing.sequence.pad_sequences(x_train, maxlen=max_length)
+x_test = preprocessing.sequence.pad_sequences(x_test, maxlen=max_length)
+# Define RNN model for sentiment analysis
+model = models.Sequential([
+layers.Embedding(input_dim=vocab_size, output_dim=128, input_length=max_length),
+layers.SimpleRNN(64, activation=’tanh’, return_sequences=True),
+layers.SimpleRNN(32, activation=’tanh’),
+layers.Dense(1, activation=’sigmoid’) # Binary classification (positive/negative sentiment)
+])
+# Compile the model
+model.compile(optimizer=’adam’,
+loss=’binary_crossentropy’,
+metrics=[’accuracy’])
+# Train the model
+history = model.fit(x_train, y_train, epochs=10, batch_size=64,
+validation_data=(x_test, y_test), verbose=1)
+# Evaluate model performance
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+print(f"\nTest Accuracy: {test_acc:.4f}\n")
+# Plot accuracy vs. epochs
+plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
+plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
+plt.xlabel(’Epochs’)
+plt.ylabel(’Accuracy’)
+plt.legend()
+plt.title(’RNN Accuracy on IMDb Sentiment Analysis’)
+plt.show()
+
+12. ImplementBidirectionalLSTMforsentimentanalysisonmovie
+reviews.
+import tensorflowastf
+from tensorflow.kerasimportlayers,models,preprocessing
+import matplotlib.pyplotasplt
+#Load IMDbdataset
+vocab_size=10000 #Limitvocabularysize
+max_length=200 #Padsequencestothislength
+(x_train,y_train),(x_test,y_test)=tf.keras.datasets.imdb.load_data(num_words=vocab_size)
+#Padsequencestoensureuniformlength
+x_train=preprocessing.sequence.pad_sequences(x_train,maxlen=max_length)
+x_test =preprocessing.sequence.pad_sequences(x_test,maxlen=max_length)
+#DefineBidirectionalLSTMmodel
+model=models.Sequential([
+layers.Embedding(input_dim=vocab_size,output_dim=128,input_length=max_length),
+layers.Bidirectional(layers.LSTM(64,return_sequences=True)), #FirstLSTMlayer
+layers.Bidirectional(layers.LSTM(32)), #SecondLSTMlayer
+layers.Dense(1,activation=’sigmoid’) #Binaryclassification(positive/negativesentiment)
+])
+#Compilethemodel
+model.compile(optimizer=’adam’,
+23
+loss=’binary_crossentropy’,
+metrics=[’accuracy’])
+#Trainthemodel
+history=model.fit(x_train,y_train,epochs=10,batch_size=64,
+validation_data=(x_test,y_test),verbose=1)
+#Evaluatemodelperformance
+test_loss,test_acc=model.evaluate(x_test,y_test,verbose=2)
+print(f"\nTestAccuracy:{test_acc:.4f}\n")
+#Plotaccuracyvs.epochs
+plt.plot(history.history[’accuracy’],label=’TrainingAccuracy’)
+plt.plot(history.history[’val_accuracy’],label=’ValidationAccuracy’)
+plt.xlabel(’Epochs’)
+plt.ylabel(’Accuracy’)
+plt.legend()
+plt.title(’BidirectionalLSTMAccuracyonIMDbSentimentAnalysis’)
+plt.show()
