@@ -1,225 +1,491 @@
-7. Use the concept of Data Augmentation to increase the data size
-from a single image.
-import cv2
-import numpy as np
-import albumentations as A
-import os
-def augment_image(image_path, output_folder, num_augmented=10):
-"""
-Applies data augmentation techniques to generate multiple variations of an image.
-Parameters:- image_path: Path to the input image.- output_folder: Folder where augmented images will be saved.- num_augmented: Number of augmented images to generate.
-"""
-if not os.path.exists(output_folder):
-os.makedirs(output_folder)
-# The problem was here: ’ss.jpeg’ needed to be a string
-image = cv2.imread(image_path)
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Also, you should convert the loaded ’image’
-transform = A.Compose([
-A.HorizontalFlip(p=0.5),
-A.VerticalFlip(p=0.3),
-A.Rotate(limit=30, p=0.5),
-A.RandomBrightnessContrast(p=0.5),
-A.GaussianBlur(blur_limit=(3, 7), p=0.3),
-A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
-])
-for i in range(num_augmented):
-augmented = transform(image=image)
-augmented_image = augmented["image"]
-save_path = os.path.join(output_folder, f"augmented_{i}.jpg")
-cv2.imwrite(save_path, cv2.cvtColor(augmented_image, cv2.COLOR_RGB2BGR))
-print(f"{num_augmented} augmented images saved in {output_folder}")
-# Example Usage
-image_path = "ss.png" # Change this to the actual image path
-output_folder = "augmented_images"
-augment_image(image_path, output_folder, num_augmented=10)
-Output:
-10 augmented images saved in augmented_images
-<ipython-input-6-548755f45b14>:28: UserWarning: Argument(s) ’var_limit’ are not valid for transform GaussNoise
-14
+ 
+Experiment 1 
+Title: Write a program to Compute Linear & Circular convolution, Cross & Auto 
+correlation using ECG/EEG/EMG 
+Software Required: 
+MATLAB 
+Program Code: 
+x = [1 2 3 4]; 
+h = [1 0 -1]; 
+y_linear = conv(x, h); 
+N = length(x); 
+y_circular = cconv(x, h, N); 
+auto_corr = xcorr(x); 
+x2 = [4 3 2 1]; 
+cross_corr = xcorr(x, x2); 
+subplot(2,2,1); stem(y_linear); title('Linear Convolution'); 
+subplot(2,2,2); stem(y_circular); title('Circular Convolution'); 
+subplot(2,2,3); stem(auto_corr); title('Auto-correlation'); 
+subplot(2,2,4); stem(cross_corr); title('Cross-correlation'); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is achieved. 
 
-9. Design and implement a CNN model to classify CIFAR10 im
-age dataset. Use Data Augmentation while designing the CNN
-model. Record accuracy corresponding to the number of epochs.
-import tensorflow as tf
-from tensorflow.keras import layers, models
-import matplotlib.pyplot as plt
-# Load MNIST and Fashion-MNIST datasets
-datasets = {
-"MNIST": tf.keras.datasets.mnist.load_data(),
-"Fashion-MNIST": tf.keras.datasets.fashion_mnist.load_data()
-}
-for dataset_name, (data_train, data_test) in datasets.items():
-(x_train, y_train), (x_test, y_test) = data_train, data_test
-# Normalize pixel values (0 to 255-> 0 to 1)
-x_train, x_test = x_train / 255.0, x_test / 255.0
-# Reshape data to fit CNN input format (28x28 images with 1 channel)
-x_train = x_train.reshape(-1, 28, 28, 1)
-x_test = x_test.reshape(-1, 28, 28, 1)
-# Convert labels to categorical format (one-hot encoding)
-y_train = tf.keras.utils.to_categorical(y_train, 10)
-y_test = tf.keras.utils.to_categorical(y_test, 10)
-# Define LeNet-5 model
-model = models.Sequential([
-layers.Conv2D(6, (5, 5), activation=’tanh’, padding=’same’, input_shape=(28, 28, 1)),
-layers.AveragePooling2D((2, 2)),
-layers.Conv2D(16, (5, 5), activation=’tanh’),
-layers.AveragePooling2D((2, 2)),
-layers.Flatten(),
-layers.Dense(120, activation=’tanh’),
-layers.Dense(84, activation=’tanh’),
-layers.Dense(10, activation=’softmax’) # Output layer with 10 classes
-])
-# Compile the model
-model.compile(optimizer=’adam’,
-loss=’categorical_crossentropy’,
-metrics=[’accuracy’])
-# Train the model
-history = model.fit(x_train, y_train, epochs=15, batch_size=128,
-validation_data=(x_test, y_test), verbose=1)
-# Evaluate accuracy
-test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
-print(f"\n{dataset_name} Test Accuracy: {test_acc:.4f}\n")
-17
-# Plot accuracy vs. epochs
-plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
-plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
-plt.xlabel(’Epochs’)
-plt.ylabel(’Accuracy’)
-plt.legend()
-plt.title(f’LeNet-5 Accuracy on {dataset_name}’
 
-10. ImplementthestandardVGG-16&VGG-19CNNarchitecture
-modelstoclassifymulti-categoryimagedatasetsandcheckthe accuracy.
-import tensorflowastf
-from tensorflow.kerasimportlayers,models
-from tensorflow.keras.applicationsimportVGG16,VGG19
-from tensorflow.keras.preprocessing.imageimportImageDataGenerator
-import matplotlib.pyplotasplt
-#Load CIFAR-10dataset(canbereplacedwithMNIST/Fashion-MNIST)
-(x_train,y_train),(x_test,y_test)=tf.keras.datasets.cifar10.load_data()
-#Normalizepixelvalues(0to255->0to1)
-x_train,x_test=x_train/255.0,x_test/255.0
-#Convertlabelstocategoricalformat
-y_train=tf.keras.utils.to_categorical(y_train,10)
-y_test =tf.keras.utils.to_categorical(y_test,10)
-19
-# Data Augmentation
-datagen = ImageDataGenerator(
-rotation_range=15,
-width_shift_range=0.1,
-height_shift_range=0.1,
-horizontal_flip=True,
-zoom_range=0.1
-)
-datagen.fit(x_train)
-# Function to build VGG model
-def build_vgg_model(vgg_type="VGG16"):
-base_model = VGG16(weights=None, include_top=False, input_shape=(32, 32, 3)) if vgg_type == "VGG16" \
-else VGG19(weights=None, include_top=False, input_shape=(32, 32, 3))
-model = models.Sequential([
-base_model,
-layers.Flatten(),
-layers.Dense(512, activation=’relu’),
-layers.Dropout(0.5),
-layers.Dense(10, activation=’softmax’)
-])
-model.compile(optimizer=’adam’,
-loss=’categorical_crossentropy’,
-metrics=[’accuracy’])
-return model
-# Train and evaluate both VGG models
-for vgg_type in ["VGG16", "VGG19"]:
-print(f"\nTraining {vgg_type} Model...\n")
-model = build_vgg_model(vgg_type)
-history = model.fit(datagen.flow(x_train, y_train, batch_size=64),
-validation_data=(x_test, y_test),
-epochs=20, verbose=1)
-# Evaluate test accuracy
-test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
-print(f"\n{vgg_type} Test Accuracy: {test_acc:.4f}\n")
-# Plot accuracy vs. epochs
-plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
-plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
-plt.xlabel(’Epochs’)
-plt.ylabel(’Accuracy’)
-plt.legend()
-plt.title(f’Accuracy of {vgg_type} on CIFAR-10’)
-plt.show()
-A.GaussNoise(var_limit=(10.0, 50.0), p=0.3),
+Experiment 2 
+Title: Write a program to Compute DFT, FFT, Power spectrum and power spectral 
+density of ECG/EEG/EMG. 
+Software Required: 
+MATLAB 
+Program Code: 
+fs = 500; 
+N = length(x); 
+t = (0:N-1)/fs; 
+X_fft = fft(x); 
+f = (0:N-1)*(fs/N); 
+power_spectrum = abs(X_fft).^2; 
+[psd_vals, freq_psd] = periodogram(x, [], [], fs); 
+figure; 
+subplot(2,2,1); plot(t, x); title('Original ECG Signal'); xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(2,2,2); plot(f, abs(X_fft)); title('Magnitude Spectrum using FFT'); 
+xlabel('Frequency (Hz)'); ylabel('|X(f)|'); 
+subplot(2,2,3); plot(f, power_spectrum); title('Power Spectrum'); xlabel('Frequency 
+(Hz)'); ylabel('Power'); 
+subplot(2,2,4); plot(freq_psd, 10*log10(psd_vals)); title('Power Spectral Density 
+(PSD)'); xlabel('Frequency (Hz)'); ylabel('Power/Frequency (dB/Hz)'); 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
 
-11. Implement RNN for sentiment analysis on movie reviews.
-21
-import tensorflow as tf
-from tensorflow.keras import layers, models, preprocessing
-import matplotlib.pyplot as plt
-# Load IMDb dataset
-vocab_size = 10000 # Limit vocabulary size
-max_length = 200 # Pad sequences to this length
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.imdb.load_data(num_words=vocab_size)
-# Pad sequences to ensure uniform length
-x_train = preprocessing.sequence.pad_sequences(x_train, maxlen=max_length)
-x_test = preprocessing.sequence.pad_sequences(x_test, maxlen=max_length)
-# Define RNN model for sentiment analysis
-model = models.Sequential([
-layers.Embedding(input_dim=vocab_size, output_dim=128, input_length=max_length),
-layers.SimpleRNN(64, activation=’tanh’, return_sequences=True),
-layers.SimpleRNN(32, activation=’tanh’),
-layers.Dense(1, activation=’sigmoid’) # Binary classification (positive/negative sentiment)
-])
-# Compile the model
-model.compile(optimizer=’adam’,
-loss=’binary_crossentropy’,
-metrics=[’accuracy’])
-# Train the model
-history = model.fit(x_train, y_train, epochs=10, batch_size=64,
-validation_data=(x_test, y_test), verbose=1)
-# Evaluate model performance
-test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
-print(f"\nTest Accuracy: {test_acc:.4f}\n")
-# Plot accuracy vs. epochs
-plt.plot(history.history[’accuracy’], label=’Training Accuracy’)
-plt.plot(history.history[’val_accuracy’], label=’Validation Accuracy’)
-plt.xlabel(’Epochs’)
-plt.ylabel(’Accuracy’)
-plt.legend()
-plt.title(’RNN Accuracy on IMDb Sentiment Analysis’)
-plt.show()
 
-12. ImplementBidirectionalLSTMforsentimentanalysisonmovie
-reviews.
-import tensorflowastf
-from tensorflow.kerasimportlayers,models,preprocessing
-import matplotlib.pyplotasplt
-#Load IMDbdataset
-vocab_size=10000 #Limitvocabularysize
-max_length=200 #Padsequencestothislength
-(x_train,y_train),(x_test,y_test)=tf.keras.datasets.imdb.load_data(num_words=vocab_size)
-#Padsequencestoensureuniformlength
-x_train=preprocessing.sequence.pad_sequences(x_train,maxlen=max_length)
-x_test =preprocessing.sequence.pad_sequences(x_test,maxlen=max_length)
-#DefineBidirectionalLSTMmodel
-model=models.Sequential([
-layers.Embedding(input_dim=vocab_size,output_dim=128,input_length=max_length),
-layers.Bidirectional(layers.LSTM(64,return_sequences=True)), #FirstLSTMlayer
-layers.Bidirectional(layers.LSTM(32)), #SecondLSTMlayer
-layers.Dense(1,activation=’sigmoid’) #Binaryclassification(positive/negativesentiment)
-])
-#Compilethemodel
-model.compile(optimizer=’adam’,
-23
-loss=’binary_crossentropy’,
-metrics=[’accuracy’])
-#Trainthemodel
-history=model.fit(x_train,y_train,epochs=10,batch_size=64,
-validation_data=(x_test,y_test),verbose=1)
-#Evaluatemodelperformance
-test_loss,test_acc=model.evaluate(x_test,y_test,verbose=2)
-print(f"\nTestAccuracy:{test_acc:.4f}\n")
-#Plotaccuracyvs.epochs
-plt.plot(history.history[’accuracy’],label=’TrainingAccuracy’)
-plt.plot(history.history[’val_accuracy’],label=’ValidationAccuracy’)
-plt.xlabel(’Epochs’)
-plt.ylabel(’Accuracy’)
-plt.legend()
-plt.title(’BidirectionalLSTMAccuracyonIMDbSentimentAnalysis’)
-plt.show()
+Experiment 3 
+Title: Write a program to Display Static and Moving ECG signal. 
+Software Required: 
+MATLAB 
+Program Code: 
+figure; 
+plot(x); 
+title('Static ECG Signal'); 
+figure; 
+for i = 1:50:length(x)-200 
+plot(x(i:i+199)); 
+axis([0 200 min(x) max(x)]); 
+title('Moving ECG Signal'); 
+pause(0.05); 
+end 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 4 
+Title: Write a program to Implement 50Hz notch filter for ECG signal and display 
+PSD. 
+Software Required: 
+MATLAB 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg_clean = 1.2 * sin(2*pi*1.7*t) + 0.25 * randn(size(t)); 
+noise = 0.5 * sin(2*pi*50*t); 
+ecg_noisy = ecg_clean + noise; 
+f0 = 50; 
+Q = 30; 
+w0 = 2*pi*f0/fs; 
+alpha = sin(w0)/(2*Q); 
+b0 = 1; 
+b1 = -2*cos(w0); 
+b2 = 1; 
+a0 = 1 + alpha; 
+a1 = -2*cos(w0); 
+a2 = 1 - alpha; 
+b = [b0 b1 b2] / a0; 
+a = [a0 a1 a2] / a0; 
+ecg_filtered = zeros(size(ecg_noisy)); 
+for n = 3:length(ecg_noisy) 
+ecg_filtered(n) = b(1)*ecg_noisy(n) + b(2)*ecg_noisy(n-1) + b(3)*ecg_noisy(n-2) 
+... 
+end - a(2)*ecg_filtered(n-1) - a(3)*ecg_filtered(n-2); 
+N = length(ecg_noisy); 
+f = (0:N-1)*(fs/N); 
+ecg_psd_noisy = abs(fft(ecg_noisy)).^2/N; 
+ecg_psd_filtered = abs(fft(ecg_filtered)).^2/N; 
+figure; 
+subplot(2,1,1); 
+plot(f, 10*log10(ecg_psd_noisy)); 
+title('PSD of Noisy ECG'); 
+xlabel('Frequency (Hz)'); 
+ylabel('Power/Frequency (dB/Hz)'); 
+xlim([0 fs/2]); 
+subplot(2,1,2); 
+plot(f, 10*log10(ecg_psd_filtered)); 
+title('PSD of Filtered ECG (50Hz Notch)'); 
+xlabel('Frequency (Hz)'); 
+ylabel('Power/Frequency (dB/Hz)'); 
+xlim([0 fs/2]); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 5 
+Title: Write a program to Implement IIR filters for ECG (LPF, HPF, BPF). 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg = 1.2*sin(2*pi*1.2*t) + 0.5*sin(2*pi*50*t) + 0.1*randn(size(t)); 
+% Low-pass filter (cutoff 40 Hz) 
+fc_l = 40; 
+wc_l = 2*pi*fc_l/fs; 
+alpha_l = (1 - sin(wc_l)) / cos(wc_l); 
+b_l = [(1 - alpha_l)/2, (1 - alpha_l)/2]; 
+a_l = [1, -alpha_l]; 
+ecg_lpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_lpf(n) = b_l(1)*ecg(n) + b_l(2)*ecg(n-1) - a_l(2)*ecg_lpf(n-1); 
+end 
+% High-pass filter (cutoff 0.5 Hz) 
+fc_h = 0.5; 
+wc_h = 2*pi*fc_h/fs; 
+alpha_h = (1 - sin(wc_h)) / cos(wc_h); 
+b_h = [(1 + alpha_h)/2, -(1 + alpha_h)/2]; 
+a_h = [1, -alpha_h]; 
+ecg_hpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_hpf(n) = b_h(1)*ecg(n) + b_h(2)*ecg(n-1) - a_h(2)*ecg_hpf(n-1); 
+end 
+% Band-pass filter (0.5 Hz - 40 Hz) 
+ecg_bpf = zeros(size(ecg)); 
+for n = 2:length(ecg) 
+ecg_bpf(n) = ecg_lpf(n) + ecg_hpf(n); 
+end 
+% Plot signals 
+figure; 
+subplot(4,1,1); plot(t, ecg); title('Original ECG'); 
+subplot(4,1,2); plot(t, ecg_lpf); title('Low-pass Filtered ECG'); 
+subplot(4,1,3); plot(t, ecg_hpf); title('High-pass Filtered ECG'); 
+subplot(4,1,4); plot(t, ecg_bpf); title('Band-pass Filtered ECG'); 
+Output: 
+Result: The expected output is verified and the objective of the experiment is 
+achieved. 
+
+
+Experiment 6 
+Title: Write a program to Implement Low-Pass FIR filter for ECG. 
+Program Code: 
+fs = 500;                      
+t = 0:1/fs:10;                
+% Sampling frequency (Hz) 
+ % Time vector for 10 seconds 
+ecg = 1.2*sin(2*pi*1.7*t) + 0.5*sin(2*pi*60*t) + 0.1*randn(size(t));  % Simulated 
+ECG + 60Hz noise 
+fc = 40;                      
+N = 51;                        
+n = 0:N-1;                    
+ % Cutoff frequency (Hz) 
+% Filter order (odd number for symmetric FIR) 
+ % Filter sample indices 
+% Ideal impulse response of low-pass filter (sinc function) 
+wc = 2*pi*fc/fs; 
+h = sin(wc*(n - (N-1)/2)) ./ (pi*(n - (N-1)/2)); 
+h((N-1)/2 + 1) = wc / pi;      
+% Handle division by zero at center 
+% Apply window (Hann window) 
+w = hann(N)'; 
+h = h .* w; 
+% Normalize filter coefficients 
+h = h / sum(h); 
+% Filter ECG signal using convolution 
+ecg_filtered = conv(ecg, h, 'same'); 
+% Plot the results 
+figure; 
+plot(t, ecg, 'b'); hold on; 
+plot(t, ecg_filtered, 'r'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+title('Low-Pass FIR Filtered ECG'); 
+legend('Original ECG', 'Filtered ECG'); 
+grid on; 
+load ecg; 
+fs = 360; 
+order = 20; 
+cutoff = 0.1; 
+b = fir1(order, cutoff); 
+y = filter(b, 1, ecg); 
+plot(y); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 7 
+Title: Write a program to implement FIR filter using Kaiser Window. 
+Program Code: 
+fs = 500; 
+t = 0:1/fs:10; 
+ecg = 1.2*sin(2*pi*1.5*t) + 0.6*sin(2*pi*60*t) + 0.1*randn(size(t)); 
+fc = 40; 
+wc = 2*pi*fc/fs; 
+A = 60; 
+if A > 50 
+beta = 0.1102*(A - 8.7); 
+elseif A >= 21 
+beta = 0.5842*(A - 21)^0.4 + 0.07886*(A - 21); 
+else 
+beta = 0; 
+end 
+delta_f = 5; 
+N = ceil((A - 8) / (2.285 * 2 * pi * delta_f / fs)); 
+if mod(N,2)==0 
+N = N + 1; 
+end 
+n = 0:N-1; 
+alpha = (N - 1)/2; 
+h = sin(wc*(n - alpha)) ./ (pi*(n - alpha)); 
+h(alpha+1) = wc/pi; 
+w = kaiser(N, beta)'; 
+h = h .* w; 
+h = h / sum(h); 
+ecg_fir = conv(ecg, h, 'same'); 
+plot(t, ecg, 'b'); hold on; 
+plot(t, ecg_fir, 'r'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+title('FIR Filtered ECG using Kaiser Window'); 
+legend('Original ECG','Filtered ECG'); 
+grid on; 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 8 
+Title: Write a program to detect QRS complex and measure the heart rate of a given 
+ECG signal. 
+Program Code: 
+% Complete MATLAB program for QRS detection and heart rate calculation 
+clear; close all; clc; 
+%% Parameters 
+fs = 360;              
+duration = 10;        
+% Sampling frequency (Hz) 
+ % Duration of signal in seconds 
+t = 0:1/fs:duration;   % Time vector 
+%% Generate synthetic ECG-like signal for testing 
+% Base heart rate ~72 bpm (1.2 Hz) 
+ecg_signal = 0.6*sin(2*pi*1.2*t); 
+% Add some noise 
+ecg_signal = ecg_signal + 0.05*randn(size(t)); 
+%% Step 1: Bandpass filter (5-15 Hz) 
+bpFilt = designfilt('bandpassiir','FilterOrder',2, ... 
+'HalfPowerFrequency1',5,'HalfPowerFrequency2',15, ... 
+'SampleRate',fs); 
+filtered_ecg = filtfilt(bpFilt, ecg_signal); 
+%% Step 2: Differentiate 
+diff_ecg = diff(filtered_ecg); 
+diff_ecg(end+1) = 0; % keep length same 
+%% Step 3: Square the signal 
+squared_ecg = diff_ecg .^ 2; 
+%% Step 4: Moving window integration (150 ms window) 
+window_size = round(0.15 * fs); 
+integrated_ecg = conv(squared_ecg, ones(1,window_size)/window_size, 'same'); 
+%% Step 5: Detect peaks on integrated signal 
+min_distance = round(0.25 * fs); % Minimum distance between peaks (250 ms) 
+threshold = mean(integrated_ecg); % Simple threshold 
+[peaks, locs] = findpeaks(integrated_ecg, 'MinPeakDistance', min_distance, 
+'MinPeakHeight', threshold); 
+qrs_peaks = locs; 
+%% Step 6: Calculate heart rate 
+rr_intervals = diff(qrs_peaks) / fs; % RR intervals in seconds 
+heart_rate = 60 ./ rr_intervals;      
+% bpm 
+%% Display results 
+fprintf('Detected QRS peak indices:\n'); 
+disp(qrs_peaks); 
+fprintf('Instantaneous Heart Rates (bpm):\n'); 
+disp(heart_rate); 
+%% Step 7: Plot results 
+figure; 
+plot(t, ecg_signal, 'b'); 
+hold on; 
+plot(t(qrs_peaks), ecg_signal(qrs_peaks), 'ro', 'MarkerSize', 8, 'LineWidth', 2); 
+xlabel('Time (s)'); 
+ylabel('ECG Amplitude'); 
+title('Synthetic ECG Signal with Detected QRS Complexes'); 
+legend('ECG Signal', 'Detected QRS Peaks'); 
+grid on; 
+Output: 
+In the command window 
+Result: The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 9 
+Title: . Write a program to improve the SNR using signal averaging technique. 
+Program Code: 
+clc; 
+clear; 
+num_trials = 100; 
+signal_length = 500; 
+fs = 1000; 
+t = (0:signal_length-1)/fs; 
+f = 5; 
+true_signal = sin(2*pi*f*t); 
+noisy_signals = zeros(num_trials, signal_length); 
+for i = 1:num_trials 
+noise = randn(1, signal_length); 
+noisy_signals(i, :) = true_signal + noise; 
+end 
+averaged_signal = mean(noisy_signals, 1); 
+figure; 
+subplot(2, 1, 1); 
+plot(t, noisy_signals(1, :), 'r'); 
+hold on; 
+plot(t, true_signal, 'k--'); 
+title('Single Noisy Signal vs True Signal'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+legend('Noisy Signal', 'True Signal'); 
+grid on; 
+subplot(2, 1, 2); 
+plot(t, averaged_signal, 'b'); 
+hold on; 
+plot(t, true_signal, 'k--'); 
+title(['Averaged Signal (', num2str(num_trials), ' trials) vs True Signal']); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+legend('Averaged Signal', 'True Signal'); 
+grid on; 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+
+
+Experiment 10 
+Title: Write a program to obtain the DCT & IDCT of ECG signal 
+Program code: 
+clc; 
+clear; 
+fs = 360; 
+t = 0:1/fs:1; 
+ecg_signal = ecg(length(t))'; 
+dct_signal = dct(ecg_signal); 
+reconstructed_ecg = idct(dct_signal); 
+figure; 
+subplot(3,1,1); 
+plot(t, ecg_signal); 
+title('Original ECG Signal'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(3,1,2); 
+stem(dct_signal, 'Marker', 'none'); 
+title('DCT of ECG Signal'); 
+xlabel('Coefficient Index'); 
+ylabel('Amplitude'); 
+subplot(3,1,3); 
+plot(t, reconstructed_ecg); 
+title('Reconstructed ECG Signal using IDCT'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Experiment 12 
+Title: Write a program to obtain Adaptive noise cancelling. 
+Program code: 
+fs = 1000;                
+t = 0:1/fs:2;               
+N = length(t);              
+mu = 0.01;                   
+M = 10;                      
+clean_signal = sin(2*pi*5*t);  
+noise = 0.5 * randn(1, N); 
+noisy_signal = clean_signal + noise; 
+ref_noise = filter([1 0.5], 1, noise);   
+w = zeros(M, 1);              
+y = zeros(1, N);               
+e = zeros(1, N);              
+for n = M:N 
+x = ref_noise(n:-1:n-M+1)';       
+y(n) = w' * x;                    
+e(n) = noisy_signal(n) - y(n);    
+w = w + mu * x * e(n);           
+end 
+% Plot results 
+figure; 
+subplot(3,1,1); 
+plot(t, noisy_signal); 
+title('Noisy Signal (Signal + Noise)'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(3,1,2); 
+plot(t, ref_noise); 
+title('Reference Noise Input'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+subplot(3,1,3); 
+plot(t, e); 
+title('Output After Adaptive Noise Cancellation'); 
+xlabel('Time (s)'); 
+ylabel('Amplitude'); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
+Experiment 13 
+Title: Write a program to compress the data using Turning point & FAN algorithm. 
+Program code: 
+% Sample input signal (you can replace this with your own data) 
+t = 0:0.01:2*pi; 
+signal = sin(t) + 0.1 * randn(size(t));  % Noisy sine wave 
+N = length(signal); 
+%% --- Turning Point Compression --- 
+tp_index = [];  % Store indices of turning points 
+for i = 2:N-1 
+prev = signal(i-1); 
+curr = signal(i); 
+next = signal(i+1); 
+if (curr > prev && curr > next) || (curr < prev && curr < next) 
+tp_index = [tp_index, i];  % Add turning point 
+end 
+end 
+% Optionally include first and last points 
+tp_index = [1, tp_index, N]; 
+tp_signal = signal(tp_index); 
+%% --- FAN Compression --- 
+fan_index = [1];  % Always keep the first point 
+epsilon = 0.01;   % Tolerance for approximation 
+i = 1; 
+while i < N - 1 
+x0 = i; 
+x1 = i + 1; 
+x2 = i + 2; 
+y0 = signal(x0); 
+y1 = signal(x1); 
+y2 = signal(x2); 
+% Linear interpolation 
+y1_est = y0 + (y2 - y0) * (x1 - x0) / (x2 - x0); 
+if abs(y1 - y1_est) > epsilon 
+fan_index = [fan_index, x1]; 
+end 
+i = i + 1; 
+end 
+fan_index = [fan_index, N];  % Always keep last point 
+fan_signal = signal(fan_index); 
+%% --- Plotting --- 
+figure; 
+subplot(3,1,1); 
+plot(t, signal); 
+title('Original Signal'); 
+xlabel('Time'); ylabel('Amplitude'); 
+subplot(3,1,2); 
+plot(t, signal, 'b'); hold on; 
+plot(t(tp_index), tp_signal, 'ro-'); 
+title('Turning Point Compression'); 
+xlabel('Time'); ylabel('Amplitude'); 
+subplot(3,1,3); 
+plot(t, signal, 'b'); hold on; 
+plot(t(fan_index), fan_signal, 'g*-'); 
+title('FAN Compression'); 
+xlabel('Time'); ylabel('Amplitude'); 
+Output: 
+Result: 
+The expected output is verified and the objective of the experiment is achieved. 
